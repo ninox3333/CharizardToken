@@ -1,0 +1,429 @@
+---
+const currentYear = new Date().getFullYear();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Charizard Token ($CHZ) is a hyper-fast, deflationary crypto asset igniting wealth for its holders."
+    />
+    <title>Charizard Token | $CHZ</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-dark: #050309;
+        --bg-glow: #140515;
+        --bg-accent: radial-gradient(circle at top, rgba(255, 111, 28, 0.32), transparent 58%);
+        --brand-fire: #ff7930;
+        --brand-dragon: #ff4c20;
+        --brand-ember: #ffd166;
+        --text-primary: #f7f7ff;
+        --text-muted: rgba(247, 247, 255, 0.7);
+        --card-bg: rgba(17, 10, 26, 0.68);
+        font-family: "Segoe UI", "Inter", "Roboto", system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg-dark);
+        color: var(--text-primary);
+        line-height: 1.6;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-image: var(--bg-accent),
+          radial-gradient(circle at bottom, rgba(255, 69, 0, 0.14), transparent 60%);
+        background-attachment: fixed;
+        overflow-x: hidden;
+      }
+
+      header {
+        padding: 3.5rem 1.5rem 2.5rem;
+        text-align: center;
+        position: relative;
+      }
+
+      header::before {
+        content: "";
+        position: absolute;
+        inset: 10% 12%;
+        background: linear-gradient(120deg, rgba(255, 121, 48, 0.18), rgba(56, 17, 71, 0.05));
+        filter: blur(80px);
+        z-index: -1;
+      }
+
+      .logo {
+        width: min(320px, 80vw);
+        max-width: 280px;
+        height: auto;
+        margin: 0 auto 1.5rem;
+        display: block;
+        filter: drop-shadow(0 0 1.5rem rgba(255, 90, 0, 0.3));
+      }
+
+      h1 {
+        font-size: clamp(2.3rem, 5vw, 3.4rem);
+        margin: 0.5rem 0;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      p {
+        margin: 0.75rem auto;
+        max-width: 640px;
+        color: var(--text-muted);
+      }
+
+      .cta {
+        margin-top: 1.75rem;
+        display: inline-flex;
+        gap: 0.85rem;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .cta a {
+        padding: 0.85rem 1.7rem;
+        border-radius: 999px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+        text-decoration: none;
+        transition: transform 120ms ease, box-shadow 120ms ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+      }
+
+      .buy-steps {
+        margin: 2.4rem auto 0;
+        padding: 1.6rem 1.9rem;
+        border-radius: 18px;
+        background: rgba(34, 13, 43, 0.55);
+        border: 1px solid rgba(255, 153, 71, 0.25);
+        width: min(560px, 94vw);
+        text-align: left;
+        box-shadow: 0 1rem 2.4rem rgba(10, 0, 18, 0.35);
+      }
+
+      .buy-steps h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.1rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--brand-ember);
+      }
+
+      .buy-steps p {
+        margin: 0.35rem 0;
+        color: var(--text-muted);
+      }
+
+      .buy-steps code {
+        font-family: "JetBrains Mono", "Fira Code", "SFMono-Regular", monospace;
+        font-size: 0.95rem;
+        color: var(--brand-ember);
+        background: rgba(255, 121, 48, 0.1);
+        padding: 0.2rem 0.4rem;
+        border-radius: 8px;
+        display: block;
+        word-break: break-all;
+        overflow-wrap: anywhere;
+      }
+
+      @media (max-width: 900px) {
+        header {
+          padding: 3.1rem 1.3rem 2.3rem;
+        }
+
+        main {
+          padding: 2.3rem 1.3rem 3.6rem;
+        }
+
+        section {
+          padding: 2rem 1.6rem;
+        }
+
+        .buy-steps {
+          padding: 1.5rem 1.7rem;
+        }
+      }
+
+      .cta-primary {
+        background: linear-gradient(135deg, var(--brand-fire), var(--brand-dragon));
+        color: #100307;
+        box-shadow: 0 0.7rem 2rem rgba(255, 98, 0, 0.35);
+      }
+
+      .cta-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 1.1rem 2.6rem rgba(255, 111, 0, 0.38);
+      }
+
+      .cta-secondary {
+        color: var(--brand-ember);
+        border: 1px solid rgba(255, 191, 112, 0.4);
+        background: rgba(37, 15, 42, 0.35);
+      }
+
+      main {
+        display: grid;
+        gap: 3rem;
+        padding: 2.5rem 1.5rem 4rem;
+        max-width: 1040px;
+        width: 100%;
+        margin: 0 auto;
+        flex: 1;
+      }
+
+      section {
+        background: var(--card-bg);
+        border: 1px solid rgba(255, 153, 71, 0.18);
+        border-radius: 22px;
+        padding: 2.2rem 1.8rem;
+        backdrop-filter: blur(14px);
+        box-shadow: 0 1.4rem 3.4rem rgba(7, 0, 12, 0.4);
+      }
+
+      section h2 {
+        font-size: clamp(1.6rem, 3.2vw, 2.2rem);
+        margin: 0 0 1rem;
+        letter-spacing: 0.03em;
+      }
+
+      .stat-grid {
+        display: grid;
+        gap: 1.4rem;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        margin-top: 1.6rem;
+      }
+
+      .stat {
+        border-radius: 18px;
+        background: rgba(23, 7, 32, 0.55);
+        padding: 1.4rem 1.2rem;
+        border: 1px solid rgba(255, 121, 48, 0.2);
+      }
+
+      .stat span:first-child {
+        display: block;
+        font-size: 0.9rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 209, 102, 0.78);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 1.6rem;
+        margin-top: 0.35rem;
+        color: var(--text-primary);
+      }
+
+      ul {
+        list-style: none;
+        padding: 0;
+        margin: 1.5rem 0 0;
+        display: grid;
+        gap: 0.9rem;
+      }
+
+      li {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        align-items: baseline;
+        gap: 0.65rem;
+        color: var(--text-muted);
+      }
+
+      li::before {
+        content: "";
+        width: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--brand-ember), var(--brand-fire));
+        box-shadow: 0 0 0.6rem rgba(255, 138, 41, 0.7);
+        margin-top: 0.3rem;
+      }
+
+      .roadmap-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin-top: 1.6rem;
+      }
+
+      .roadmap-card {
+        padding: 1.4rem 1.2rem;
+        border-radius: 18px;
+        background: rgba(31, 9, 41, 0.55);
+        border: 1px solid rgba(255, 111, 48, 0.18);
+      }
+
+      .roadmap-card h3 {
+        margin: 0 0 0.6rem;
+        font-size: 1.1rem;
+        color: var(--brand-ember);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+      }
+
+      footer {
+        padding: 1.8rem 1.5rem 3rem;
+        text-align: center;
+        font-size: 0.85rem;
+        color: rgba(255, 255, 255, 0.55);
+      }
+
+      footer a {
+        color: var(--brand-ember);
+        text-decoration: none;
+      }
+
+      @media (max-width: 640px) {
+        header {
+          padding-top: 2.8rem;
+        }
+
+        .cta {
+          flex-direction: column;
+          width: min(320px, 100%);
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        section {
+          padding: 1.8rem 1.4rem;
+        }
+
+        .buy-steps {
+          width: 100%;
+          padding: 1.4rem 1.3rem;
+        }
+
+        .buy-steps code {
+          font-size: 0.88rem;
+          word-break: break-word;
+          overflow-wrap: anywhere;
+        }
+
+        .buy-steps p {
+          margin: 0.45rem 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img
+        src="/assets/logo.png"
+        alt="Charizard Token emblem"
+        class="logo"
+        width="520"
+        loading="eager"
+      />
+      <h1>Charizard Token // $CHZ</h1>
+      <p>
+        Forged in digital fire, Charizard Token is a 1,000,000,000 supply, ultra-fast deflationary asset engineered to empower a fearless community.
+        Every burn fuels scarcity, every holder becomes part of the flame.
+      </p>
+      <div class="cta">
+        <a class="cta-primary" href="#tokenomics">Explore Tokenomics</a>
+        <a class="cta-secondary" href="#ignite">Join the Flame</a>
+      </div>
+      <div class="buy-steps">
+        <h3>Steps to Buy</h3>
+        <p>Transfer SOL to <code>9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP</code></p>
+        <p><strong>0.1 SOL = 350,000 $CHZ</strong></p>
+      </div>
+    </header>
+
+    <main>
+      <section id="tokenomics">
+        <h2>Dragon-Forged Tokenomics</h2>
+        <p>
+          $CHZ blends iconic Charizard energy with disciplined supply mechanics to ignite growth while protecting holders from runaway inflation.
+        </p>
+        <div class="stat-grid">
+          <div class="stat">
+            <span>Total Supply</span>
+            <strong>1,000,000,000 $CHZ</strong>
+          </div>
+          <div class="stat">
+            <span>Burn Mechanism</span>
+            <strong>Auto Deflationary</strong>
+          </div>
+          <div class="stat">
+            <span>Liquidity</span>
+            <strong>Battle-Tested Pools</strong>
+          </div>
+        </div>
+        <ul>
+          <li>Dynamic burn events reduce circulating supply with every major milestone.</li>
+          <li>Community vaults fund cross-chain expansion and real-world utility.</li>
+          <li>Transparent on-chain governance lets flame-bearers vote on the next evolution.</li>
+        </ul>
+      </section>
+
+      <section id="utility">
+        <h2>Utility that Breathes Fire</h2>
+        <p>
+          Charizard Token is more than a meme—it is a wealth-engine built for blazing-fast transactions, gamified rewards, and collaborative quests that keep the ecosystem thriving.
+        </p>
+        <ul>
+          <li>Flash-speed transfers optimized for low fees, even when the market heats up.</li>
+          <li>Earn ember rewards by staking $CHZ during community burn campaigns.</li>
+          <li>Unlock exclusive drops, merch, and metaverse arenas with your token holdings.</li>
+        </ul>
+      </section>
+
+      <section id="ignite">
+        <h2>Ignition Roadmap</h2>
+        <p>
+          The evolution of $CHZ stays true to the Charizard spirit—strategic, unstoppable, and ready to conquer the next arena.
+        </p>
+        <div class="roadmap-grid">
+          <div class="roadmap-card">
+            <h3>Phase 01 // Spark</h3>
+            <p>Token launch, genesis airdrop to early flame-bearers, liquidity ignition, and the first ceremonial burn to mark the founding flame.</p>
+          </div>
+          <div class="roadmap-card">
+            <h3>Phase 02 // Blaze</h3>
+            <p>Cross-exchange listings, GameFi integrations, and Charizard lore-driven NFT ascent.</p>
+          </div>
+          <div class="roadmap-card">
+            <h3>Phase 03 // Inferno</h3>
+            <p>DAO governance, recurring deflation events, and global community raids to expand the fire.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="community">
+        <h2>Empower the Holders</h2>
+        <p>
+          Every token holder is part of an elite squadron of fire-breathers. Together we strike, we burn supply, and we push $CHZ to new heights.
+          Join the mission to transform early believers into the next wave of crypto millionaires.
+        </p>
+        <div class="cta">
+          <a class="cta-primary" href="#">Get $CHZ</a>
+          <a class="cta-secondary" href="/litepaper" target="_blank" rel="noopener noreferrer">View Litepaper</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        © {currentYear} Charizard Token. Fan-made homage inspired by the legend of Charizard.<br />
+        
+      </p>
+    </footer>
+  </body>
+</html>
