@@ -1,4 +1,5 @@
----
+import Analytics from "@vercel/analytics/astro";
+
 const currentYear = new Date().getFullYear();
 ---
 
@@ -423,9 +424,11 @@ const currentYear = new Date().getFullYear();
 
     <footer>
       <p>
-        © {currentYear} Charizard Token. Fan-made homage inspired by the legend of Charizard.<br />
-        
+        {currentYear} Charizard Token. Fan-made homage inspired by the legend of Charizard.<br />
+        Always DYOR. Crypto assets carry risk.
       </p>
     </footer>
+
+    <Analytics />
   </body>
 </html>

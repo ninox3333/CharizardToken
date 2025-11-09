@@ -1,4 +1,5 @@
----
+import Analytics from "@vercel/analytics/astro";
+
 const year = new Date().getFullYear();
 ---
 
@@ -327,5 +328,7 @@ const year = new Date().getFullYear();
     <footer>
       © {year} Charizard Token. Fan-made homage inspired by Charizard. Always do your own research.
     </footer>
+
+    <Analytics />
   </body>
 </html>
