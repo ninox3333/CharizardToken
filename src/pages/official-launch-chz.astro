@@ -137,6 +137,7 @@ import Analytics from "@vercel/analytics/astro";
 
       <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
       <button id="launch-token" class="btn btn-primary" disabled>2. Ignite $CHZ Launch</button>
+      <button id="register-metadata" class="btn btn-primary" style="background: linear-gradient(90deg, #ffd166, #ff7930);" disabled>3. Register Name & Logo</button>
       
       <div id="mint-address-display" style="display:none; margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
         <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">OFFICIAL TOKEN MINT ADDRESS:</span>
@@ -163,16 +164,32 @@ import Analytics from "@vercel/analytics/astro";
         TOKEN_PROGRAM_ID, 
         MINT_SIZE 
       } from "@solana/spl-token";
-      
+      import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+      import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
+      import { 
+        createMetadataAccountV3, 
+        mplTokenMetadata, 
+        findMetadataPda 
+      } from "@metaplex-foundation/mpl-token-metadata";
+      import { 
+        publicKey as umiPublicKey, 
+        none,
+        fromWeb3JsPublicKey
+      } from "@metaplex-foundation/umi";
+
       // Official Parameters
       const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
       const TOKEN_DECIMALS = 9;
       const TOTAL_SUPPLY = 1000000000;
+      const METADATA_URI = "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json";
 
       let walletAddress = null;
+      let currentMint = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
+      
       const logContainer = document.getElementById('log-container');
       const connectBtn = document.getElementById('connect-wallet');
       const launchBtn = document.getElementById('launch-token');
+      const metadataBtn = document.getElementById('register-metadata');
       const mintDisplay = document.getElementById('mint-address-display');
       const mintCode = document.getElementById('mint-address');
 
@@ -198,6 +215,7 @@ import Analytics from "@vercel/analytics/astro";
             connectBtn.innerText = `CONNECTED: ${walletAddress.slice(0,6)}...`;
             connectBtn.style.borderColor = '#4caf50';
             launchBtn.disabled = false;
+            metadataBtn.disabled = false;
             log(`Authority wallet connected: ${walletAddress}`, 'success');
           } else {
             log("Phantom Wallet not found!", "error");
@@ -215,9 +233,8 @@ import Analytics from "@vercel/analytics/astro";
 
         try {
           const RPC_ENDPOINTS = [
-            "https://api.mainnet-beta.solana.com",
-            "https://solana-mainnet.rpc.extrnode.com",
             "https://solana-rpc.publicnode.com",
+            "https://api.mainnet-beta.solana.com",
             "https://rpc.solana.com"
           ];
 
@@ -228,7 +245,7 @@ import Analytics from "@vercel/analytics/astro";
             try {
               log(`Connecting to node: ${url}...`, "info");
               const conn = new Connection(url, "confirmed");
-              await conn.getLatestBlockhash(); // Verification step
+              await conn.getLatestBlockhash();
               connection = conn;
               log(`Connected successfully to ${url}`, "success");
               break;
@@ -241,16 +258,12 @@ import Analytics from "@vercel/analytics/astro";
           if (!connection) throw lastError;
           
           const payer = new PublicKey(walletAddress);
-          
-          // 1. Generate Mint Keypair
           const mintKeypair = Keypair.generate();
           log(`Generating secure mint account...`, "info");
 
-          // 2. Calculate Rent
           const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
           log(`Reserving storage space on-chain...`, "info");
 
-          // 3. Create Mint Account & Initialize
           const createAccountIx = SystemProgram.createAccount({
             fromPubkey: payer,
             newAccountPubkey: mintKeypair.publicKey,
@@ -266,7 +279,6 @@ import Analytics from "@vercel/analytics/astro";
             payer
           );
 
-          // 4. Create Associated Token Account for the Owner
           const ataAddress = await getAssociatedTokenAddress(
             mintKeypair.publicKey,
             payer
@@ -279,7 +291,6 @@ import Analytics from "@vercel/analytics/astro";
             mintKeypair.publicKey
           );
 
-          // 5. Mint 1 Billion Tokens
           const mintToIx = createMintToInstruction(
             mintKeypair.publicKey,
             ataAddress,
@@ -287,7 +298,6 @@ import Analytics from "@vercel/analytics/astro";
             TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS)
           );
 
-          // Build Transaction
           const transaction = new Transaction().add(
             createAccountIx,
             initMintIx,
@@ -308,14 +318,15 @@ import Analytics from "@vercel/analytics/astro";
 
           await connection.confirmTransaction(signature);
           
+          currentMint = mintKeypair.publicKey.toString();
           log("🔥 $CHZ TOKEN HAS BEEN CREATED!", "success");
           log(`1,000,000,000 $CHZ are now in your wallet.`, "success");
           
           mintDisplay.style.display = 'block';
-          mintCode.innerText = mintKeypair.publicKey.toString();
+          mintCode.innerText = currentMint;
           launchBtn.innerText = "TOKEN DEPLOYED";
           
-          log("IMPORTANT: Copy the Mint Address below for your website and social media.", "success");
+          log("IMPORTANT: Now proceed to register metadata.", "success");
 
         } catch (err) {
           log(`Deployment failed: ${err.message}`, "error");
@@ -323,8 +334,57 @@ import Analytics from "@vercel/analytics/astro";
         }
       }
 
+      async function registerMetadata() {
+        if (!walletAddress) return;
+        metadataBtn.disabled = true;
+        log("Initiating Metadata Registration...", "info");
+
+        try {
+          const umi = createUmi("https://solana-rpc.publicnode.com")
+            .use(mplTokenMetadata())
+            .use(walletAdapterIdentity(window.solana));
+
+          const mint = umiPublicKey(currentMint);
+          const metadata = findMetadataPda(umi, { mint });
+
+          log(`Mint: ${currentMint}`, "info");
+          log(`Registering: Charizard Token ($CHZ)...`, "info");
+
+          const transaction = createMetadataAccountV3(umi, {
+            metadata,
+            mint,
+            mintAuthority: umi.identity,
+            payer: umi.identity,
+            updateAuthority: fromWeb3JsPublicKey(new PublicKey(OWNER_WALLET)),
+            data: {
+              name: "Charizard Token",
+              symbol: "CHZ",
+              uri: METADATA_URI,
+              sellerFeeBasisPoints: 0,
+              creators: none(),
+              collection: none(),
+              uses: none(),
+            },
+            isMutable: true,
+            collectionDetails: none(),
+          });
+
+          log("PLEASE SIGN IN PHANTOM TO REGISTER METADATA...", "info");
+          const result = await transaction.sendAndConfirm(umi);
+          
+          log("🔥 METADATA REGISTERED SUCCESSFULLY!", "success");
+          log("Solscan and Wallets will update soon with the Name and Logo.", "success");
+          metadataBtn.innerText = "METADATA REGISTERED";
+
+        } catch (err) {
+          log(`Metadata registration failed: ${err.message}`, "error");
+          metadataBtn.disabled = false;
+        }
+      }
+
       connectBtn.addEventListener('click', connect);
       launchBtn.addEventListener('click', launch);
+      metadataBtn.addEventListener('click', registerMetadata);
     </script>
   </body>
 </html>

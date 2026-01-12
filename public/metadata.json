@@ -1,0 +1,17 @@
+{
+    "name": "Charizard Token",
+    "symbol": "CHZ",
+    "description": "Forged in digital fire, Charizard Token ($CHZ) is an ultra-fast deflationary asset engineered to empower a fearless community.",
+    "image": "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/assets/logo.png",
+    "attributes": [
+        {
+            "trait_type": "Element",
+            "value": "Fire"
+        },
+        {
+            "trait_type": "Evolution",
+            "value": "Final"
+        }
+    ],
+    "external_url": "https://github.com/ninox3333/CharizardToken"
+}
