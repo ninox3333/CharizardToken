@@ -32,8 +32,8 @@ import Analytics from "@vercel/analytics/astro";
       }
 
       .container {
-        max-width: 600px;
-        width: 95%;
+        max-width: 500px;
+        width: 90%;
         background: rgba(17, 10, 26, 0.8);
         padding: 3rem;
         border-radius: 32px;
@@ -62,103 +62,211 @@ import Analytics from "@vercel/analytics/astro";
         font-weight: 800;
       }
 
-      .step-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.1);
-        padding: 1.5rem;
-        border-radius: 16px;
-        margin-bottom: 1.5rem;
-      }
-
-      .step-number {
-        background: var(--brand-fire);
-        color: #000;
-        width: 24px;
-        height: 24px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        font-weight: 800;
-        margin-right: 10px;
-      }
-
-      h3 {
-        margin: 0 0 1rem;
-        color: var(--brand-ember);
-      }
-
       p {
+        text-align: center;
         color: var(--text-muted);
         font-size: 0.9rem;
-        line-height: 1.4;
+        margin-bottom: 2rem;
+      }
+
+      .status-box {
+        background: rgba(0,0,0,0.3);
+        padding: 1.5rem;
+        border-radius: 16px;
+        margin-bottom: 2rem;
+        font-family: monospace;
+        font-size: 0.85rem;
+        border: 1px solid rgba(255,255,255,0.05);
+        max-height: 200px;
+        overflow-y: auto;
       }
 
       .btn {
-        display: block;
         width: 100%;
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 1.2rem;
+        border-radius: 14px;
         border: none;
         font-weight: 800;
-        text-align: center;
-        text-decoration: none;
         cursor: pointer;
-        margin-top: 1rem;
+        transition: all 0.2s;
+        margin-bottom: 1rem;
         text-transform: uppercase;
+        letter-spacing: 1px;
       }
 
       .btn-primary {
-        background: var(--brand-fire);
+        background: linear-gradient(90deg, #ff7930, #ff4c20);
         color: #000;
+        box-shadow: 0 5px 15px rgba(255, 76, 32, 0.3);
+      }
+
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
       }
 
       .btn-secondary {
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.05);
         color: #fff;
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid rgba(255,255,255,0.1);
       }
 
-      code {
-        background: #000;
-        padding: 4px 8px;
-        border-radius: 4px;
-        color: #fff;
-        font-family: monospace;
+      .log-item {
+        margin-bottom: 0.4rem;
+        word-break: break-all;
       }
+
+      .log-success { color: #4caf50; }
+      .log-error { color: #f44336; }
+      .log-info { color: #2196f3; }
     </style>
   </head>
   <body>
     <div class="container">
-      <span class="admin-badge">RELIABLE BRANDING GUIDE</span>
-      <h1>FINALIZE $CHZ</h1>
+      <span class="admin-badge">OFFICIAL $CHZ AUTHORITY PANEL</span>
+      <h1>BRAND THE FLAME</h1>
+      <p>Register the name, symbol, and logo for your $CHZ token on the blockchain.</p>
+
+      <div class="status-box" id="log-container">
+        <div class="log-item" id="init-log">> Initializing Polyfills...</div>
+      </div>
+
+      <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
+      <button id="register-metadata" class="btn btn-primary" style="background: linear-gradient(90deg, #ffd166, #ff7930);" disabled>2. Register Name & Logo (FREE)</button>
       
-      <div class="step-card">
-        <h3><span class="step-number">1</span>Verify Mint Address</h3>
-        <p>Your official token has already been created. This is the address:</p>
-        <code style="display:block; margin: 10px 0; word-break: break-all;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
+      <div id="mint-address-display" style="margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+        <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">TARGET TOKEN MINT:</span>
+        <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
       </div>
-
-      <div class="step-card">
-        <h3><span class="step-number">2</span>Manual Branding (Safe Way)</h3>
-        <p>Since the automated browser tool is hitting security blocks in your Phantom, use the 100% official way to upload your logo and name.</p>
-        
-        <p style="margin-top: 1rem;"><strong>Recommended Tool:</strong> <a href="https://v1.slr.tools/token-branding" target="_blank" style="color:var(--brand-fire)">SLR Token Branding</a> (Verified for Solana Mainnet).</p>
-        
-        <ul style="color: var(--text-muted); font-size: 0.85rem; padding-left: 20px; margin-top: 10px;">
-          <li>Connect your wallet: <code>9Vsan6...5wP</code></li>
-          <li>Enter Mint: <code>7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code></li>
-          <li>Name: <code>Charizard Token</code> | Symbol: <code>CHZ</code></li>
-          <li>Logo: Upload your <code>logo.png</code></li>
-        </ul>
-      </div>
-
-      <div class="step-card">
-        <h3><span class="step-number">3</span>Alternative: CoinBrain</h3>
-        <p>If you plan to list on exchanges soon, the fastest way to get your logo appearing in wallets is to "Claim your token" on <a href="https://coinbrain.com/coins/solana-7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe" target="_blank" style="color:var(--brand-fire)">CoinBrain</a> or <strong>DexTools</strong>.</p>
-      </div>
-
-      <a href="/" class="btn btn-secondary">← Back to Website</a>
     </div>
+
+    <script>
+      // 1. ROBUST POLYFILLS
+      import { Buffer } from "buffer";
+      import process from "process";
+      import stream from "stream-browserify";
+
+      window.Buffer = Buffer;
+      window.process = process;
+      window.stream = stream;
+      globalThis.Buffer = Buffer;
+      globalThis.process = process;
+
+      // 2. IMPORTS
+      import { Connection, PublicKey } from "@solana/web3.js";
+      import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
+      import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
+      import { 
+        createMetadataAccountV3, 
+        mplTokenMetadata, 
+        findMetadataPda,
+        LogoInstructionData
+      } from "@metaplex-foundation/mpl-token-metadata";
+      import { 
+        publicKey as umiPublicKey, 
+        none,
+      } from "@metaplex-foundation/umi";
+      import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
+
+      // 3. PARAMETERS
+      const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
+      const MINT_ADDRESS = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
+      const METADATA_URI = "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json";
+
+      let walletAddress = null;
+      const logContainer = document.getElementById('log-container');
+      const initLog = document.getElementById('init-log');
+      const connectBtn = document.getElementById('connect-wallet');
+      const metadataBtn = document.getElementById('register-metadata');
+
+      function log(msg, type = 'info') {
+        const div = document.createElement('div');
+        div.className = `log-item log-${type}`;
+        div.innerText = `> ${msg}`;
+        logContainer.appendChild(div);
+        logContainer.scrollTop = logContainer.scrollHeight;
+      }
+
+      if (initLog) initLog.innerText = "> Polyfills loaded. Engine Ready.";
+
+      async function connect() {
+        log("Accessing Phantom...", "info");
+        try {
+          const { solana } = window;
+          if (solana?.isPhantom) {
+            const res = await solana.connect();
+            walletAddress = res.publicKey.toString();
+            
+            if (walletAddress !== OWNER_WALLET) {
+              log(`AUTH ALERT: Connected wallet (${walletAddress}) is not the Authority!`, "error");
+            } else {
+              log(`Authority wallet verified: ${walletAddress}`, 'success');
+              connectBtn.innerText = `CONNECTED: ${walletAddress.slice(0,6)}...`;
+              metadataBtn.disabled = false;
+            }
+          } else {
+            log("Phantom Wallet not found.", "error");
+            window.open('https://phantom.app/', '_blank');
+          }
+        } catch (err) {
+          log(`Connection failed: ${err.message}`, "error");
+        }
+      }
+
+      async function register() {
+        if (!walletAddress) return;
+        metadataBtn.disabled = true;
+        log("Initializing Metaplex Umi...", "info");
+
+        try {
+          const umi = createUmi("https://solana-rpc.publicnode.com")
+            .use(mplTokenMetadata())
+            .use(walletAdapterIdentity(window.solana));
+
+          const mint = umiPublicKey(MINT_ADDRESS);
+          const metadata = findMetadataPda(umi, { mint });
+
+          log(`Registering Branding for ${MINT_ADDRESS}...`, "info");
+
+          const transaction = createMetadataAccountV3(umi, {
+            metadata,
+            mint,
+            mintAuthority: umi.identity,
+            payer: umi.identity,
+            updateAuthority: fromWeb3JsPublicKey(new PublicKey(OWNER_WALLET)),
+            data: {
+              name: "Charizard Token",
+              symbol: "CHZ",
+              uri: METADATA_URI,
+              sellerFeeBasisPoints: 0,
+              creators: none(),
+              collection: none(),
+              uses: none(),
+            },
+            isMutable: true,
+            collectionDetails: none(),
+          });
+
+          log("PLEASE SIGN IN PHANTOM TO RECORD BRANDING...", "success");
+          const result = await transaction.sendAndConfirm(umi);
+          
+          log("🔥 BRANDING REGISTERED SUCCESSFULLY!", "success");
+          log("The logo and name will appear on Solscan and Phantom shortly.", "success");
+          metadataBtn.innerText = "BRANDING SUCCESSFUL";
+
+        } catch (err) {
+          log(`Error: ${err.message}`, "error");
+          console.error(err);
+          metadataBtn.disabled = false;
+        }
+      }
+
+      connectBtn.addEventListener('click', connect);
+      metadataBtn.addEventListener('click', register);
+    </script>
   </body>
 </html>
