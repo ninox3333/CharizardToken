@@ -88,10 +88,11 @@ const currentYear = new Date().getFullYear();
 
       .cta {
         margin-top: 1.75rem;
-        display: inline-flex;
+        display: flex;
         gap: 0.85rem;
         justify-content: center;
         align-items: center;
+        flex-wrap: wrap; /* Ensures buttons stack on small mobile screens */
       }
 
       .cta a {
@@ -194,19 +195,28 @@ const currentYear = new Date().getFullYear();
 
       @media (max-width: 900px) {
         header {
-          padding: 3.1rem 1.3rem 2.3rem;
+          padding: 2.5rem 1rem 1.5rem;
         }
 
         main {
-          padding: 2.3rem 1.3rem 3.6rem;
+          padding: 1.5rem 1rem 2.5rem;
         }
 
         section {
-          padding: 2rem 1.6rem;
+          padding: 1.5rem 1rem;
         }
 
         .buy-steps {
-          padding: 1.5rem 1.7rem;
+          padding: 1.2rem 1.2rem;
+          width: 96vw;
+        }
+
+        h1 {
+          font-size: 2.1rem;
+        }
+
+        .big-win p {
+          font-size: 0.85rem;
         }
       }
 
