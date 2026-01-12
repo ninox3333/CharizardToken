@@ -757,6 +757,15 @@ const currentYear = new Date().getFullYear();
       
       let connectedWallet = null;
       let provider = null;
+      
+      // Cache Solana modules to prevent repeated heavy imports
+      let solanaModules = null;
+      async function getSolanaModules() {
+        if (!solanaModules) {
+          solanaModules = await import('@solana/web3.js');
+        }
+        return solanaModules;
+      }
 
       // Format number with commas
       function formatNumber(num) {
@@ -892,7 +901,7 @@ const currentYear = new Date().getFullYear();
           txMessage.style.color = "#ffd166";
 
           // Create connection
-          const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = await import('@solana/web3.js');
+          const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = await getSolanaModules();
           const connection = new Connection(SOLANA_RPC, 'confirmed');
 
           // Calculate lamports
