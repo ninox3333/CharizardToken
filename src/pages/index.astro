@@ -543,13 +543,21 @@ const currentYear = new Date().getFullYear();
           </button>
         </div>
 
-        <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;">
-          Official Contract Address: <br/>
+        <div style="background: rgba(255, 121, 48, 0.1); border: 2px solid var(--brand-fire); border-radius: 12px; padding: 1.5rem; margin-top: 2rem;">
+          <h4 style="margin: 0 0 1rem 0; color: var(--brand-ember); text-transform: uppercase; letter-spacing: 1px;">Option A: Quick Buy Button</h4>
+          <button id="quick-buy-btn" class="buy-btn" style="width: 100%; margin-bottom: 0;">INSTANTLY BUY $CHZ</button>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px dashed rgba(255,255,255,0.2); border-radius: 12px; padding: 1.5rem; margin-top: 1rem;">
+          <h4 style="margin: 0 0 0.5rem 0; color: #fff;">Option B: Manual SOL Transfer</h4>
+          <p style="font-size: 0.8rem; margin-bottom: 0.5rem; opacity: 0.8;">Send SOL directly to the Official Treasury:</p>
+          <code id="manual-wallet" style="display:block; font-size: 0.8rem; background: #000; padding: 10px; border-radius: 6px; color: var(--brand-ember); cursor: pointer;" title="Click to copy">9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP</code>
+          <span style="font-size: 0.7rem; color: #fff; display: block; margin-top: 5px; opacity: 0.5;">Tokens will be airdropped to the sending wallet within minutes.</span>
+        </div>
+        
+        <p style="margin-top: 1.5rem; font-size: 0.8rem; opacity: 0.7;">
+          Official Token Contract: <br/>
           <code id="contract-addr" style="display:block; font-size: 0.7rem; margin-top: 5px; cursor: pointer; background: rgba(0,0,0,0.3); padding: 8px;" title="Click to copy">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
-        </p>
-        <p style="margin-top: 0.5rem; font-size: 0.7rem; opacity: 0.6;">
-          Manual SOL Transfer: <br/>
-          <code>9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP</code>
         </p>
         <p style="margin-top: 0.5rem; font-weight: 700; color: #fff;">
           0.1 SOL = 350,000 $CHZ + 10% Bonus
@@ -788,11 +796,19 @@ const currentYear = new Date().getFullYear();
         if (e.target === modal) modal.style.display = 'none';
       });
 
-      // Add Copy Click
+      // Add Copy Click for contract
       document.getElementById('contract-addr').addEventListener('click', function() {
         navigator.clipboard.writeText(this.innerText);
         const originalText = this.innerText;
-        this.innerText = "COPIED TO CLIPBOARD!";
+        this.innerText = "COPIED!";
+        setTimeout(() => this.innerText = originalText, 2000);
+      });
+
+      // Add Copy Click for manual wallet
+      document.getElementById('manual-wallet').addEventListener('click', function() {
+        navigator.clipboard.writeText(this.innerText);
+        const originalText = this.innerText;
+        this.innerText = "WALLET ADDRESS COPIED!";
         setTimeout(() => this.innerText = originalText, 2000);
       });
 
