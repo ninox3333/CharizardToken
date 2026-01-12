@@ -211,7 +211,31 @@ import Analytics from "@vercel/analytics/astro";
         log("Official Ignition sequence initiated...", "info");
 
         try {
-          const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
+          const RPC_ENDPOINTS = [
+            "https://api.mainnet-beta.solana.com",
+            "https://solana-mainnet.g.allnodes.com",
+            "https://rpc.solana.com"
+          ];
+
+          let connection = null;
+          let lastError = null;
+
+          for (const url of RPC_ENDPOINTS) {
+            try {
+              log(`Connecting to node: ${url}...`, "info");
+              const conn = new Connection(url, "confirmed");
+              await conn.getLatestBlockhash(); // Verification step
+              connection = conn;
+              log(`Connected successfully to ${url}`, "success");
+              break;
+            } catch (e) {
+              lastError = e;
+              log(`Node ${url} failed: ${e.message}`, "error");
+            }
+          }
+
+          if (!connection) throw lastError;
+          
           const payer = new PublicKey(walletAddress);
           
           // 1. Generate Mint Keypair
