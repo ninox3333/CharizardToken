@@ -7,15 +7,14 @@ import Analytics from "@vercel/analytics/astro";
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>$CHZ Launchpad | Official Admin</title>
+    <title>$CHZ Branding Panel | Authority Only</title>
     <style>
       :root {
         color-scheme: dark;
         --bg: #050309;
         --fire: #ff7930;
-        --gold: #ffd166;
         --text: #f7f7ff;
-        font-family: "Segoe UI", system-ui, sans-serif;
+        font-family: system-ui, sans-serif;
       }
 
       body {
@@ -27,31 +26,32 @@ import Analytics from "@vercel/analytics/astro";
         align-items: center;
         justify-content: center;
         min-height: 100vh;
-        background-image: radial-gradient(circle at top, rgba(255, 111, 28, 0.1), transparent 70%);
+        background-image: radial-gradient(circle at center, rgba(255, 111, 28, 0.05) 0%, transparent 70%);
       }
 
       .card {
-        max-width: 550px;
+        max-width: 500px;
         width: 90%;
         background: rgba(17, 10, 26, 0.9);
         padding: 2.5rem;
         border-radius: 24px;
-        border: 1px solid rgba(255, 121, 48, 0.2);
-        box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        border: 1px solid rgba(255, 121, 48, 0.3);
+        box-shadow: 0 50px 100px rgba(0,0,0,0.8);
       }
 
-      h1 { text-align: center; color: var(--fire); margin: 0 0 1.5rem; letter-spacing: 1px; }
+      h1 { color: var(--fire); text-align: center; margin-bottom: 2rem; }
 
-      .status-box {
+      .console {
         background: #000;
-        padding: 1rem;
+        padding: 1.2rem;
         border-radius: 12px;
         font-family: monospace;
-        font-size: 0.8rem;
-        border: 1px solid rgba(255,255,255,0.1);
-        margin: 1.5rem 0;
-        height: 180px;
+        font-size: 0.85rem;
+        border: 1px solid #333;
+        margin-bottom: 1.5rem;
+        height: 150px;
         overflow-y: auto;
+        color: #ffd166;
       }
 
       .btn {
@@ -61,59 +61,57 @@ import Analytics from "@vercel/analytics/astro";
         border: none;
         font-weight: 800;
         cursor: pointer;
-        transition: 0.2s;
-        margin-bottom: 1rem;
         text-transform: uppercase;
+        margin-bottom: 1rem;
+        transition: 0.2s;
       }
 
-      .btn-primary {
-        background: var(--fire);
-        color: #000;
-      }
+      .btn-primary { background: var(--fire); color: #000; }
+      .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+      .btn-secondary { background: rgba(255,255,255,0.1); color: #fff; }
 
-      .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-
-      .btn-secondary { background: rgba(255,255,255,0.05); color: #fff; }
-
-      .log-error { color: #ff4c20; }
       .log-success { color: #4caf50; }
-      .log-info { color: #ffd166; }
+      .log-error { color: #ff5252; }
     </style>
   </head>
   <body>
-    <!-- 1. EXTREME POLYFILLS FOR METAPLEX -->
+    <!-- EXTREME POLYFILLS TO KILL THE PROTOTYPE ERROR -->
     <script is:inline>
       window.global = window;
-      window.process = { env: {} };
-      if (!window.Buffer) {
-        window.Buffer = { isBuffer: () => false };
-      }
-      // Heavy polyfill for the Readable.prototype error
+      window.process = { env: {}, nextTick: (fn) => setTimeout(fn, 0) };
+      
+      // Mocking stream to avoid prototype error in Metaplex
       if (typeof window.EventEmitter === 'undefined') {
         window.EventEmitter = function() {};
         window.EventEmitter.prototype.on = function() {};
+        window.EventEmitter.prototype.once = function() {};
         window.EventEmitter.prototype.emit = function() {};
       }
-      // Mock stream if not present
-      if (typeof window.ReadableStream === 'undefined') {
-        window.ReadableStream = function() {};
-      }
+      
+      const Readable = function() {};
+      Readable.prototype.on = function() {};
+      
+      window.stream = {
+        Readable: Readable,
+        Writable: function() {},
+        Transform: function() {},
+        PassThrough: function() {},
+        Stream: function() {}
+      };
     </script>
 
     <div class="card">
-      <h1>$CHZ ADMIN PANEL</h1>
-      <p style="text-align: center; opacity: 0.7; font-size: 0.9rem;">Authority Only: <code>9Vsan6...5wP</code></p>
-
-      <div class="status-box" id="console">
-        <div style="color: #666;">> Direct Blockchain Access Ready.</div>
+      <h1>$CHZ MANAGER</h1>
+      <p style="font-size: 0.8rem; text-align: center; margin-top: -1.5rem; opacity: 0.5;">Target: <code>7pQ6NN...He</code></p>
+      
+      <div id="status-log" class="console">
+        > Engine initialized. Awaiting owner wallet...
       </div>
 
       <button id="btn-connect" class="btn btn-secondary">1. Connect Authority Wallet</button>
-      <button id="btn-brand" class="btn btn-primary" disabled>2. Register Name & Logo (FREE)</button>
+      <button id="btn-brand" class="btn btn-primary" disabled>2. Register Brand & Logo (FREE)</button>
       
-      <p style="text-align: center; font-size: 0.75rem; opacity: 0.5; margin-top: 1rem;">
-        CHZ Mint: <code>7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
-      </p>
+      <p style="text-align: center; font-size: 0.7rem; opacity: 0.4;">Est. Fee: 0.015 SOL (Network Only)</p>
     </div>
 
     <script>
@@ -123,52 +121,52 @@ import Analytics from "@vercel/analytics/astro";
 
       import { Connection, PublicKey } from "@solana/web3.js";
       
-      const AUTHORIZED_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
-      const MINT_ADDR = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
-      const METADATA_URI = "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json";
+      const OWNER = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
+      const MINT = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
+      const JSON_URI = "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json";
 
-      const logConsole = document.getElementById('console');
+      const logBox = document.getElementById('status-log');
       const btnConnect = document.getElementById('btn-connect');
       const btnBrand = document.getElementById('btn-brand');
 
-      function log(msg, type = 'default') {
-        const entry = document.createElement('div');
-        entry.className = type === 'default' ? '' : `log-${type}`;
-        entry.innerText = `> ${msg}`;
-        logConsole.appendChild(entry);
-        logConsole.scrollTop = logConsole.scrollHeight;
+      function log(msg, type = '') {
+        const div = document.createElement('div');
+        div.innerText = `> ${msg}`;
+        if (type) div.className = `log-${type}`;
+        logBox.appendChild(div);
+        logBox.scrollTop = logBox.scrollHeight;
       }
 
       let wallet = null;
 
       btnConnect.onclick = async () => {
-        log("Requesting Phantom connection...", "info");
         try {
           const { solana } = window;
           if (!solana?.isPhantom) {
-            log("Phantom Wallet not found!", "error");
+            log("Error: Phantom not found!", "error");
             return;
           }
           const resp = await solana.connect();
           wallet = resp.publicKey.toString();
           
-          if (wallet !== AUTHORIZED_WALLET) {
-            log(`UNAUTHORIZED WALLET: ${wallet.slice(0,6)}...`, "error");
+          if (wallet !== OWNER) {
+            log(`ALERT: Access denied for ${wallet.slice(0,6)}...`, "error");
+            log(`Switch to official owner wallet in Phantom.`, "error");
             return;
           }
 
-          log(`Authorized: ${wallet.slice(0,8)}...`, "success");
-          btnConnect.innerText = "WALLET CONNECTED";
+          log(`Authority verified: ${wallet.slice(0,10)}...`, "success");
+          btnConnect.innerText = "OWNER CONNECTED";
           btnBrand.disabled = false;
         } catch (e) { log(e.message, "error"); }
       };
 
       btnBrand.onclick = async () => {
         btnBrand.disabled = true;
-        log("Accessing Token Registry...", "info");
+        log("Deploying branding sequence...", "info");
         
         try {
-          // CLEAN DYNAMIC IMPORTS
+          // Dynamic load of Metaplex to ensure polyfills are ready
           const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
           const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
           const { 
@@ -179,25 +177,25 @@ import Analytics from "@vercel/analytics/astro";
           const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
           const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
 
-          log("Connecting to Solana Global Network...", "info");
-          const umi = createUmi("https://solana-rpc.publicnode.com")
+          log("Establishing blockchain bridge...");
+          const umi = createUmi("https://solana-rpc.publicnode.com") // Using a more stable RPC
             .use(mplTokenMetadata())
             .use(walletAdapterIdentity(window.solana));
 
-          const mint = umiPublicKey(MINT_ADDR);
+          const mint = umiPublicKey(MINT);
           const metadata = findMetadataPda(umi, { mint });
 
-          log("Building Registration Packet...", "info");
-          const transaction = createMetadataAccountV3(umi, {
+          log("Building Metadata packet...");
+          const tx = createMetadataAccountV3(umi, {
             metadata,
             mint,
             mintAuthority: umi.identity,
             payer: umi.identity,
-            updateAuthority: fromWeb3JsPublicKey(new PublicKey(AUTHORIZED_WALLET)),
+            updateAuthority: fromWeb3JsPublicKey(new PublicKey(OWNER)),
             data: {
               name: "Charizard Token",
               symbol: "CHZ",
-              uri: METADATA_URI,
+              uri: JSON_URI,
               sellerFeeBasisPoints: 0,
               creators: none(),
               collection: none(),
@@ -207,12 +205,12 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("APPROVE IN PHANTOM (FREE - Only Gas Fees)", "success");
-          const result = await transaction.sendAndConfirm(umi);
+          log("PHANTOM: Approve official registration (FREE)...", "success");
+          const result = await tx.sendAndConfirm(umi);
           
-          log("🔥 BRANDING COMPLETE! YOUR TOKEN IS OFFICIAL.", "success");
-          log("Check Solscan in a few minutes.", "info");
-          btnBrand.innerText = "REGISTERED";
+          log("🔥 BRANDING COMPLETE! LFG!", "success");
+          log("Check Solscan/Phantom in 2 mins.", "success");
+          btnBrand.innerText = "SUCCESSFUL";
         } catch (e) {
           log(`Fail: ${e.message}`, "error");
           console.error(e);
