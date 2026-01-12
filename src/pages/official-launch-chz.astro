@@ -127,28 +127,25 @@ import Analytics from "@vercel/analytics/astro";
   </head>
   <body>
     <div class="container">
-      <span class="admin-badge">PRIVATE ADMIN PANEL</span>
-      <h1>LAUNCH OFFICIAL $CHZ</h1>
-      <p>Official Authority: <code>9Vsan6...5wP</code></p>
+      <span class="admin-badge">OFFICIAL $CHZ MANAGER</span>
+      <h1>TOKEN DASHBOARD</h1>
+      <p style="font-size: 0.8rem; margin-top: -1rem;">Authority: <code>9Vsan6...5wP</code></p>
 
       <div class="status-box" id="log-container">
-        <div class="log-item" id="init-log">> Systems ready...</div>
+        <div class="log-item" id="init-log">> Dashboard loaded.</div>
       </div>
 
       <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
-      <button id="launch-token" class="btn btn-primary" disabled>2. Ignite $CHZ (1B Supply)</button>
+      <button id="launch-token" class="btn btn-primary" disabled>2. Mint $CHZ (1 Billion)</button>
+      <button id="register-metadata" class="btn btn-primary" style="background: linear-gradient(90deg, #ffd166, #ff7930);" disabled>3. Finalize Name & Logo</button>
       
       <div id="mint-address-display" style="display:none; margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
-        <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">OFFICIAL TOKEN MINT:</span>
+        <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">YOUR TOKEN MINT:</span>
         <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
-      </div>
-
-      <div style="margin-top: 2rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
-        <p>After Step 2, use <a href="https://token-creator-lac.vercel.app/" target="_blank" style="color: var(--brand-fire);">Solana Token Manager</a> to upload the name and logo if the internal tool fails.</p>
       </div>
     </div>
 
-    <!-- POLYFILLS -->
+    <!-- CLEAN POLYFILLS -->
     <script is:inline>
       window.global = window;
       window.process = { env: {} };
@@ -167,25 +164,23 @@ import Analytics from "@vercel/analytics/astro";
         Keypair 
       } from "@solana/web3.js";
       import { 
-        createInitializeMintInstruction, 
         getAssociatedTokenAddress, 
         createAssociatedTokenAccountInstruction, 
         createMintToInstruction, 
+        createInitializeMintInstruction,
         TOKEN_PROGRAM_ID, 
         MINT_SIZE 
       } from "@solana/spl-token";
 
       const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
-      const TOKEN_DECIMALS = 9;
-      const TOTAL_SUPPLY = 1000000000;
-
-      let walletAddress = null;
       let currentMint = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
-      
+      let walletAddress = null;
+
       const logContainer = document.getElementById('log-container');
       const initLog = document.getElementById('init-log');
       const connectBtn = document.getElementById('connect-wallet');
       const launchBtn = document.getElementById('launch-token');
+      const metadataBtn = document.getElementById('register-metadata');
       const mintDisplay = document.getElementById('mint-address-display');
       const mintCode = document.getElementById('mint-address');
 
@@ -197,88 +192,121 @@ import Analytics from "@vercel/analytics/astro";
         logContainer.scrollTop = logContainer.scrollHeight;
       }
 
-      if (initLog) initLog.innerText = "> Engine online. Waiting for wallet...";
+      if (initLog) initLog.innerText = "> Awaiting wallet connection...";
 
       async function connect() {
-        log("Connecting to Phantom...", "info");
         try {
           const { solana } = window;
           if (solana?.isPhantom) {
             const res = await solana.connect();
             walletAddress = res.publicKey.toString();
-            
-            connectBtn.innerText = `READY: ${walletAddress.slice(0,6)}...`;
-            connectBtn.style.color = '#ff7930';
+            connectBtn.innerText = `AUTHORIZED: ${walletAddress.slice(0,6)}`;
+            log(`Wallet connected.`, 'success');
             launchBtn.disabled = false;
-            
-            if (walletAddress !== OWNER_WALLET) {
-              log(`WARNING: Unrecognized wallet.`, "error");
-            } else {
-              log(`Authority verified: ${walletAddress}`, 'success');
-            }
+            metadataBtn.disabled = false;
           } else {
-            log("Phantom not detected.", "error");
-            window.open('https://phantom.app/', '_blank');
+            log("Phantom not found.", "error");
           }
         } catch (err) {
-          log(`Failed: ${err.message}`, "error");
+          log(`Connection failed: ${err.message}`, "error");
+        }
+      }
+
+      // NO-UMI METADATA LOGIC
+      async function registerMetadata() {
+        if (!walletAddress) return;
+        metadataBtn.disabled = true;
+        log("Accessing branding modules...", "info");
+
+        try {
+          // Import only what is needed, avoiding the big UMI prototype issues
+          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
+          const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
+          const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
+          const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
+          const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
+
+          log("Connecting to network...", "info");
+          const umi = createUmi("https://solana-rpc.publicnode.com")
+            .use(mplTokenMetadata())
+            .use(walletAdapterIdentity(window.solana));
+
+          const mint = umiPublicKey(currentMint);
+          const metadata = findMetadataPda(umi, { mint });
+
+          log(`Finalizing Charizard Token ($CHZ)...`, "info");
+          
+          const transaction = createMetadataAccountV3(umi, {
+            metadata,
+            mint,
+            mintAuthority: umi.identity,
+            payer: umi.identity,
+            updateAuthority: fromWeb3JsPublicKey(new PublicKey(OWNER_WALLET)),
+            data: {
+              name: "Charizard Token",
+              symbol: "CHZ",
+              uri: "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json",
+              sellerFeeBasisPoints: 0,
+              creators: none(),
+              collection: none(),
+              uses: none(),
+            },
+            isMutable: true,
+            collectionDetails: none(),
+          });
+
+          log("SIGN IN PHANTOM TO FINALIZE...", "info");
+          await transaction.sendAndConfirm(umi);
+          
+          log("🔥 TOKEN IS OFFICIALLY BRANDED!", "success");
+          metadataBtn.innerText = "SUCCESS";
+
+        } catch (err) {
+          log(`Metadata Error: ${err.message}`, "error");
+          metadataBtn.disabled = false;
         }
       }
 
       async function launch() {
         if (!walletAddress) return;
         launchBtn.disabled = true;
-        log("Igniting launch sequence...", "info");
-
+        log("Launching new token...", "info");
+        // Logic same as before for minting
         try {
           const connection = new Connection("https://solana-rpc.publicnode.com", "confirmed");
           const payer = new PublicKey(walletAddress);
           const mintKeypair = Keypair.generate();
-          
-          log("Calculating blockchain space...", "info");
           const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
-          
           const transaction = new Transaction().add(
             SystemProgram.createAccount({
-              fromPubkey: payer,
-              newAccountPubkey: mintKeypair.publicKey,
-              space: MINT_SIZE,
-              lamports,
-              programId: TOKEN_PROGRAM_ID,
+              fromPubkey: payer, newAccountPubkey: mintKeypair.publicKey,
+              space: MINT_SIZE, lamports, programId: TOKEN_PROGRAM_ID,
             }),
-            createInitializeMintInstruction(mintKeypair.publicKey, TOKEN_DECIMALS, payer, payer)
+            createInitializeMintInstruction(mintKeypair.publicKey, 9, payer, payer)
           );
-
-          const ataAddress = await getAssociatedTokenAddress(mintKeypair.publicKey, payer);
+          const ata = await getAssociatedTokenAddress(mintKeypair.publicKey, payer);
           transaction.add(
-            createAssociatedTokenAccountInstruction(payer, ataAddress, payer, mintKeypair.publicKey),
-            createMintToInstruction(mintKeypair.publicKey, ataAddress, payer, TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS))
+            createAssociatedTokenAccountInstruction(payer, ata, payer, mintKeypair.publicKey),
+            createMintToInstruction(mintKeypair.publicKey, ata, payer, 1000000000 * 10**9)
           );
-
           const { blockhash } = await connection.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           transaction.feePayer = payer;
           transaction.partialSign(mintKeypair);
 
-          log("PLEASE SIGN TRANSACTION...", "info");
+          log("SIGN MINT TRANSACTION...", "info");
           const { signature } = await window.solana.signAndSendTransaction(transaction);
-          
-          log("Confirming creation...", "info");
           await connection.confirmTransaction(signature);
-          
           currentMint = mintKeypair.publicKey.toString();
-          log("🔥 TOKEN CREATED!", "success");
+          log(`Minted: ${currentMint}`, "success");
           mintDisplay.style.display = 'block';
           mintCode.innerText = currentMint;
-          
-        } catch (err) {
-          log(`Error: ${err.message}`, "error");
-          launchBtn.disabled = false;
-        }
+        } catch(e) { log(e.message, "error"); launchBtn.disabled = false; }
       }
 
       connectBtn.addEventListener('click', connect);
       launchBtn.addEventListener('click', launch);
+      metadataBtn.addEventListener('click', registerMetadata);
     </script>
   </body>
 </html>
