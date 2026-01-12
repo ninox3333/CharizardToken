@@ -544,7 +544,8 @@ const currentYear = new Date().getFullYear();
         </div>
 
         <p style="margin-top: 1rem; font-size: 0.8rem; opacity: 0.7;">
-          Direct Transfer Address: <code style="display:inline; font-size: 0.7rem;">9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP</code>
+          Official Contract Address: <br/>
+          <code id="contract-addr" style="display:block; font-size: 0.7rem; margin-top: 5px; cursor: pointer; background: rgba(0,0,0,0.3); padding: 8px;" title="Click to copy">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
         </p>
         <p style="margin-top: 0.5rem; font-weight: 700; color: #fff;">
           0.1 SOL = 350,000 $CHZ + 10% Bonus
@@ -670,6 +671,7 @@ const currentYear = new Date().getFullYear();
       } from "@solana/web3.js";
 
       const DESTINATION_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
+      const MINT_ADDRESS = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
       const SOL_TO_CHZ_RATE = 3500000; // 1 SOL = 3,500,000 CHZ
       const CASHBACK_BONUS = 1.1; // 10% bonus
 
@@ -780,6 +782,14 @@ const currentYear = new Date().getFullYear();
       // Close modal on outside click
       window.addEventListener('click', (e) => {
         if (e.target === modal) modal.style.display = 'none';
+      });
+
+      // Add Copy Click
+      document.getElementById('contract-addr').addEventListener('click', function() {
+        navigator.clipboard.writeText(this.innerText);
+        const originalText = this.innerText;
+        this.innerText = "COPIED TO CLIPBOARD!";
+        setTimeout(() => this.innerText = originalText, 2000);
       });
 
       // Check if already connected
