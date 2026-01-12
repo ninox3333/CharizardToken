@@ -146,12 +146,8 @@ import Analytics from "@vercel/analytics/astro";
     </div>
 
     <script>
-      console.log("CHZ Launchpad: Script starting...");
+      // 1. TOP LEVEL IMPORTS
       import { Buffer } from "buffer";
-      window.Buffer = Buffer;
-      
-      document.getElementById('init-log').innerText = "> Systems ready. Awaiting wallet...";
-
       import { 
         Connection, 
         PublicKey, 
@@ -176,11 +172,17 @@ import Analytics from "@vercel/analytics/astro";
       } from "@metaplex-foundation/mpl-token-metadata";
       import { 
         publicKey as umiPublicKey, 
-        none
+        none,
       } from "@metaplex-foundation/umi";
       import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
 
-      // Official Parameters
+      // 2. POLYFILLS
+      window.Buffer = Buffer;
+      if (typeof window.process === 'undefined') {
+        window.process = { env: {} };
+      }
+
+      // 3. PAGE LOGIC
       const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
       const TOKEN_DECIMALS = 9;
       const TOTAL_SUPPLY = 1000000000;
@@ -190,6 +192,7 @@ import Analytics from "@vercel/analytics/astro";
       let currentMint = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
       
       const logContainer = document.getElementById('log-container');
+      const initLog = document.getElementById('init-log');
       const connectBtn = document.getElementById('connect-wallet');
       const launchBtn = document.getElementById('launch-token');
       const metadataBtn = document.getElementById('register-metadata');
@@ -204,7 +207,11 @@ import Analytics from "@vercel/analytics/astro";
         logContainer.scrollTop = logContainer.scrollHeight;
       }
 
+      // Signal ready
+      if (initLog) initLog.innerText = "> Systems online. Awaiting wallet connection...";
+
       async function connect() {
+        log("Attempting to connect to Phantom...", "info");
         try {
           const { solana } = window;
           if (solana?.isPhantom) {
@@ -212,20 +219,20 @@ import Analytics from "@vercel/analytics/astro";
             walletAddress = res.publicKey.toString();
             
             if (walletAddress !== OWNER_WALLET) {
-              log(`WARNING: Connected wallet (${walletAddress}) does not match Owner Wallet!`, "error");
+              log(`CRITICAL: Connected wallet is NOT the authorized owner!`, "error");
             }
             
             connectBtn.innerText = `CONNECTED: ${walletAddress.slice(0,6)}...`;
-            connectBtn.style.borderColor = '#4caf50';
+            connectBtn.style.color = '#4caf50';
             launchBtn.disabled = false;
             metadataBtn.disabled = false;
             log(`Authority wallet connected: ${walletAddress}`, 'success');
           } else {
-            log("Phantom Wallet not found!", "error");
+            log("Error: Phantom Wallet not found in browser.", "error");
             window.open('https://phantom.app/', '_blank');
           }
         } catch (err) {
-          log(err.message, "error");
+          log(`Connection failed: ${err.message}`, "error");
         }
       }
 
@@ -242,31 +249,26 @@ import Analytics from "@vercel/analytics/astro";
           ];
 
           let connection = null;
-          let lastError = null;
-
           for (const url of RPC_ENDPOINTS) {
             try {
-              log(`Connecting to node: ${url}...`, "info");
+              log(`Trying node: ${url}...`, "info");
               const conn = new Connection(url, "confirmed");
               await conn.getLatestBlockhash();
               connection = conn;
-              log(`Connected successfully to ${url}`, "success");
+              log(`Connected to ${url}`, "success");
               break;
             } catch (e) {
-              lastError = e;
-              log(`Node ${url} failed: ${e.message}`, "error");
+              log(`Node failure: ${e.message}`, "error");
             }
           }
 
-          if (!connection) throw lastError;
+          if (!connection) throw new Error("All RPC nodes failed. Check internet connection.");
           
           const payer = new PublicKey(walletAddress);
           const mintKeypair = Keypair.generate();
           log(`Generating secure mint account...`, "info");
 
           const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
-          log(`Reserving storage space on-chain...`, "info");
-
           const createAccountIx = SystemProgram.createAccount({
             fromPubkey: payer,
             newAccountPubkey: mintKeypair.publicKey,
@@ -282,54 +284,28 @@ import Analytics from "@vercel/analytics/astro";
             payer
           );
 
-          const ataAddress = await getAssociatedTokenAddress(
-            mintKeypair.publicKey,
-            payer
-          );
+          const ataAddress = await getAssociatedTokenAddress(mintKeypair.publicKey, payer);
+          const createAtaIx = createAssociatedTokenAccountInstruction(payer, ataAddress, payer, mintKeypair.publicKey);
+          const mintToIx = createMintToInstruction(mintKeypair.publicKey, ataAddress, payer, TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS));
 
-          const createAtaIx = createAssociatedTokenAccountInstruction(
-            payer,
-            ataAddress,
-            payer,
-            mintKeypair.publicKey
-          );
-
-          const mintToIx = createMintToInstruction(
-            mintKeypair.publicKey,
-            ataAddress,
-            payer,
-            TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS)
-          );
-
-          const transaction = new Transaction().add(
-            createAccountIx,
-            initMintIx,
-            createAtaIx,
-            mintToIx
-          );
-
+          const transaction = new Transaction().add(createAccountIx, initMintIx, createAtaIx, mintToIx);
           const { blockhash } = await connection.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           transaction.feePayer = payer;
           transaction.partialSign(mintKeypair);
 
-          log("PLEASE SIGN IN PHANTOM TO DEPLOY $CHZ...", "info");
+          log("PLEASE SIGN IN PHANTOM...", "info");
           const { signature } = await window.solana.signAndSendTransaction(transaction);
           
-          log(`Deployment transaction sent!`, "info");
-          log("Waiting for network confirmation...", "info");
-
+          log(`Transaction sent! Confirming...`, "info");
           await connection.confirmTransaction(signature);
           
           currentMint = mintKeypair.publicKey.toString();
-          log("🔥 $CHZ TOKEN HAS BEEN CREATED!", "success");
-          log(`1,000,000,000 $CHZ are now in your wallet.`, "success");
+          log("🔥 TOKEN CREATED!", "success");
           
           mintDisplay.style.display = 'block';
           mintCode.innerText = currentMint;
-          launchBtn.innerText = "TOKEN DEPLOYED";
-          
-          log("IMPORTANT: Now proceed to register metadata.", "success");
+          log("Proceed to Step 3 for Name and Logo.", "success");
 
         } catch (err) {
           log(`Deployment failed: ${err.message}`, "error");
@@ -338,9 +314,12 @@ import Analytics from "@vercel/analytics/astro";
       }
 
       async function registerMetadata() {
-        if (!walletAddress) return;
+        if (!walletAddress) {
+          log("Error: Connect wallet first!", "error");
+          return;
+        }
         metadataBtn.disabled = true;
-        log("Initiating Metadata Registration...", "info");
+        log("Opening Metaplex connection...", "info");
 
         try {
           const umi = createUmi("https://solana-rpc.publicnode.com")
@@ -372,20 +351,23 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("PLEASE SIGN IN PHANTOM TO REGISTER METADATA...", "info");
-          const result = await transaction.sendAndConfirm(umi);
+          log("SIGN IN PHANTOM TO CONFIRM NAME & LOGO...", "info");
+          await transaction.sendAndConfirm(umi);
           
-          log("🔥 METADATA REGISTERED SUCCESSFULLY!", "success");
-          log("Solscan and Wallets will update soon with the Name and Logo.", "success");
-          metadataBtn.innerText = "METADATA REGISTERED";
+          log("🔥 METADATA REGISTERED!", "success");
+          log("Wallets will update soon with the logo.", "success");
+          metadataBtn.innerText = "SUCCESSFUL";
 
         } catch (err) {
-          log(`Metadata registration failed: ${err.message}`, "error");
+          log(`Metadata error: ${err.message}`, "error");
           metadataBtn.disabled = false;
         }
       }
 
-      connectBtn.addEventListener('click', connect);
+      connectBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        connect();
+      });
       launchBtn.addEventListener('click', launch);
       metadataBtn.addEventListener('click', registerMetadata);
     </script>
