@@ -81,13 +81,22 @@ import Analytics from "@vercel/analytics/astro";
     </style>
   </head>
   <body>
-    <!-- 1. CRITICAL POLYFILLS (Must be first and inline) -->
+    <!-- 1. EXTREME POLYFILLS FOR METAPLEX -->
     <script is:inline>
       window.global = window;
       window.process = { env: {} };
-      // Fallback for EventEmitter/Buffer that libraries expect
       if (!window.Buffer) {
-        window.Buffer = { isBuffer: () => false }; 
+        window.Buffer = { isBuffer: () => false };
+      }
+      // Heavy polyfill for the Readable.prototype error
+      if (typeof window.EventEmitter === 'undefined') {
+        window.EventEmitter = function() {};
+        window.EventEmitter.prototype.on = function() {};
+        window.EventEmitter.prototype.emit = function() {};
+      }
+      // Mock stream if not present
+      if (typeof window.ReadableStream === 'undefined') {
+        window.ReadableStream = function() {};
       }
     </script>
 
@@ -96,7 +105,7 @@ import Analytics from "@vercel/analytics/astro";
       <p style="text-align: center; opacity: 0.7; font-size: 0.9rem;">Authority Only: <code>9Vsan6...5wP</code></p>
 
       <div class="status-box" id="console">
-        <div style="color: #666;">> System ready. Connect wallet to proceed.</div>
+        <div style="color: #666;">> Direct Blockchain Access Ready.</div>
       </div>
 
       <button id="btn-connect" class="btn btn-secondary">1. Connect Authority Wallet</button>
@@ -108,9 +117,8 @@ import Analytics from "@vercel/analytics/astro";
     </div>
 
     <script>
-      // 2. IMPORT LIBRARIES (These will be polyfilled correctly by the build tool now)
       import { Buffer } from "buffer";
-      window.Buffer = Buffer; 
+      window.Buffer = Buffer;
       globalThis.Buffer = Buffer;
 
       import { Connection, PublicKey } from "@solana/web3.js";
@@ -131,13 +139,10 @@ import Analytics from "@vercel/analytics/astro";
         logConsole.scrollTop = logConsole.scrollHeight;
       }
 
-      // Capture all global errors for debugging
-      window.onerror = function(msg) { log(`CRTICAL ERROR: ${msg}`, 'error'); };
-
       let wallet = null;
 
       btnConnect.onclick = async () => {
-        log("Phantom access requested...", "info");
+        log("Requesting Phantom connection...", "info");
         try {
           const { solana } = window;
           if (!solana?.isPhantom) {
@@ -148,30 +153,33 @@ import Analytics from "@vercel/analytics/astro";
           wallet = resp.publicKey.toString();
           
           if (wallet !== AUTHORIZED_WALLET) {
-            log(`STRICT ACCESS: Wallet ${wallet.slice(0,6)}... unauthorized.`, "error");
+            log(`UNAUTHORIZED WALLET: ${wallet.slice(0,6)}...`, "error");
             return;
           }
 
           log(`Authorized: ${wallet.slice(0,8)}...`, "success");
-          btnConnect.innerText = "WALLET AUTHORIZED";
-          btnConnect.style.borderColor = "#4caf50";
+          btnConnect.innerText = "WALLET CONNECTED";
           btnBrand.disabled = false;
         } catch (e) { log(e.message, "error"); }
       };
 
       btnBrand.onclick = async () => {
         btnBrand.disabled = true;
-        log("Loading Metaplex Branding Engine...", "info");
+        log("Accessing Token Registry...", "info");
         
         try {
-          // Dynamic Import to avoid startup crashes
+          // CLEAN DYNAMIC IMPORTS
           const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
           const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
-          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
+          const { 
+            createMetadataAccountV3, 
+            mplTokenMetadata, 
+            findMetadataPda 
+          } = await import("@metaplex-foundation/mpl-token-metadata");
           const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
           const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
 
-          log("Establishing secure connection...", "info");
+          log("Connecting to Solana Global Network...", "info");
           const umi = createUmi("https://solana-rpc.publicnode.com")
             .use(mplTokenMetadata())
             .use(walletAdapterIdentity(window.solana));
@@ -179,8 +187,8 @@ import Analytics from "@vercel/analytics/astro";
           const mint = umiPublicKey(MINT_ADDR);
           const metadata = findMetadataPda(umi, { mint });
 
-          log("Generating branding transaction...", "info");
-          const tx = createMetadataAccountV3(umi, {
+          log("Building Registration Packet...", "info");
+          const transaction = createMetadataAccountV3(umi, {
             metadata,
             mint,
             mintAuthority: umi.identity,
@@ -199,14 +207,14 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("PHANTOM: SIGN TO APPROVE BRANDING", "success");
-          await tx.sendAndConfirm(umi);
+          log("APPROVE IN PHANTOM (FREE - Only Gas Fees)", "success");
+          const result = await transaction.sendAndConfirm(umi);
           
-          log("🔥 CHZ BRANDED SUCCESSFULLY!", "success");
-          log("Check Solscan in 2-3 minutes.", "info");
-          btnBrand.innerText = "SUCCESSFUL";
+          log("🔥 BRANDING COMPLETE! YOUR TOKEN IS OFFICIAL.", "success");
+          log("Check Solscan in a few minutes.", "info");
+          btnBrand.innerText = "REGISTERED";
         } catch (e) {
-          log(`Branding failed: ${e.message}`, "error");
+          log(`Fail: ${e.message}`, "error");
           console.error(e);
           btnBrand.disabled = false;
         }
