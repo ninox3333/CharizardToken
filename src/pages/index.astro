@@ -550,10 +550,6 @@ const currentYear = new Date().getFullYear();
           }
         </style>
 
-        <p style="margin-top: 1.5rem; font-size: 0.8rem; opacity: 0.7;">
-          Official Token Contract: <br/>
-          <code id="contract-addr" style="display:block; font-size: 0.7rem; margin-top: 5px; cursor: pointer; background: rgba(0,0,0,0.3); padding: 8px;" title="Click to copy">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
-        </p>
         <p style="margin-top: 0.5rem; font-weight: 700; color: #fff;">
           0.1 SOL = 385,000 $CHZ (incl. BONUS)
         </p>
@@ -658,13 +654,6 @@ const currentYear = new Date().getFullYear();
 
       let walletAddress = null;
 
-      // Add Copy Click for contract
-      document.getElementById('contract-addr').addEventListener('click', function() {
-        navigator.clipboard.writeText(this.innerText);
-        const originalText = this.innerText;
-        this.innerText = "COPIED!";
-        setTimeout(() => this.innerText = originalText, 2000);
-      });
 
       // Add Copy Click for manual wallet
       document.getElementById('manual-wallet-big').addEventListener('click', function() {
