@@ -1,0 +1,19 @@
+{
+  "name": "charizard-token",
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "astro": "^4.10.2"
+  },
+  "dependencies": {
+    "@metaplex-foundation/js": "^0.20.1",
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "@vercel/analytics": "^1.5.0"
+  }
+}

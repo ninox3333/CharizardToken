@@ -1,0 +1,335 @@
+---
+import Analytics from "@vercel/analytics/astro";
+
+const year = new Date().getFullYear();
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Charizard Token ($CHZ) Litepaper outlining the vision, tokenomics, mechanics, and roadmap of this deflationary crypto asset."
+    />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/logo.png" />
+    <link rel="apple-touch-icon" href="/assets/logo.png" />
+    <title>Charizard Token Litepaper | $CHZ</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg-main: #050309;
+        --bg-secondary: rgba(26, 12, 40, 0.7);
+        --brand-fire: #ff7930;
+        --brand-dragon: #ff4c20;
+        --brand-ember: #ffd166;
+        --text-primary: #f7f7ff;
+        --text-muted: rgba(247, 247, 255, 0.78);
+        --divider: rgba(255, 138, 71, 0.32);
+        font-family: "Segoe UI", "Inter", "Roboto", system-ui, -apple-system, sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: radial-gradient(circle at top, rgba(255, 98, 0, 0.16), transparent 55%),
+          radial-gradient(circle at bottom, rgba(118, 45, 158, 0.18), transparent 60%), var(--bg-main);
+        color: var(--text-primary);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        line-height: 1.7;
+      }
+
+      header {
+        padding: clamp(2.4rem, 6vw, 4rem) clamp(1.2rem, 3vw, 3rem);
+        max-width: 1040px;
+        width: 100%;
+        margin: 0 auto;
+        text-align: center;
+      }
+
+      .logo {
+        width: min(280px, 70vw);
+        height: auto;
+        margin: 0 auto 1.6rem;
+        display: block;
+        filter: drop-shadow(0 0 1.4rem rgba(255, 120, 40, 0.35));
+      }
+
+      header h1 {
+        font-size: clamp(2.4rem, 5vw, 3.6rem);
+        margin-bottom: 0.75rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+      }
+
+      header p {
+        margin: 0 auto;
+        max-width: 720px;
+        color: var(--text-muted);
+      }
+
+      main {
+        flex: 1;
+        width: 100%;
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: clamp(1.8rem, 5vw, 3.4rem) clamp(1.2rem, 3vw, 3rem) 4rem;
+        display: grid;
+        gap: clamp(1.8rem, 4vw, 2.8rem);
+      }
+
+      section {
+        background: var(--bg-secondary);
+        border: 1px solid rgba(255, 138, 71, 0.22);
+        border-radius: 22px;
+        padding: clamp(1.6rem, 4vw, 2.4rem);
+        box-shadow: 0 1.2rem 2.8rem rgba(6, 0, 11, 0.4);
+        backdrop-filter: blur(14px);
+      }
+
+      section h2 {
+        margin-top: 0;
+        margin-bottom: 0.9rem;
+        font-size: clamp(1.6rem, 3vw, 2.2rem);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      section h3 {
+        margin-top: 1.6rem;
+        margin-bottom: 0.6rem;
+        font-size: 1.2rem;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--brand-ember);
+      }
+
+      p,
+      li {
+        color: var(--text-muted);
+      }
+
+      ul,
+      ol {
+        padding-left: 1.2rem;
+        margin: 0.8rem 0 0;
+      }
+
+      .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-top: 1.3rem;
+      }
+
+      .stat {
+        background: rgba(18, 8, 28, 0.7);
+        border: 1px solid rgba(255, 111, 48, 0.28);
+        border-radius: 18px;
+        padding: 1.2rem 1.4rem;
+      }
+
+      .stat span {
+        display: block;
+        font-size: 0.85rem;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 209, 102, 0.82);
+        margin-bottom: 0.4rem;
+      }
+
+      .stat strong {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+      }
+
+      blockquote {
+        margin: 1.4rem 0;
+        padding: 1.2rem 1.4rem;
+        border-left: 4px solid var(--brand-fire);
+        background: rgba(18, 7, 28, 0.7);
+        border-radius: 12px;
+        color: var(--text-muted);
+      }
+
+      footer {
+        text-align: center;
+        padding: 2rem 1.5rem 3rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.85rem;
+      }
+
+      @media (max-width: 720px) {
+        header {
+          padding: 2.3rem 1.2rem;
+        }
+
+        main {
+          padding: 1.6rem 1rem 3rem;
+        }
+
+        section {
+          padding: 1.5rem 1.3rem;
+        }
+
+        .stat-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <img
+        src="/assets/logo.png"
+        alt="Charizard Token emblem"
+        class="logo"
+        width="360"
+        height="360"
+        loading="eager"
+      />
+      <h1>Charizard Token Litepaper</h1>
+      <p>
+        $CHZ is a deflationary, community-driven asset inspired by Charizard’s relentless flame. This litepaper details the mission, mechanics,
+        and execution strategy that fuel our push to ignite wealth for every holder.
+      </p>
+    </header>
+
+    <main>
+      <section>
+        <h2>Vision &amp; Mission</h2>
+        <p>
+          Charizard Token seeks to channel the energy of the legendary fire dragon into a crypto ecosystem that rewards conviction, speed, and
+          community coordination. Our mission is to create a hyper-engaged economy where scarcity is engineered, growth is community-led, and the
+          upside belongs to those who help the flame grow.
+        </p>
+        <blockquote>
+          Empower early believers, weaponize burns for scarcity, and transform holders into the next generation of crypto millionaires.
+        </blockquote>
+      </section>
+
+      <section>
+        <h2>Token Fundamentals</h2>
+        <div class="stat-grid">
+          <div class="stat">
+            <span>Total Supply</span>
+            <strong>1,000,000,000 $CHZ</strong>
+          </div>
+          <div class="stat">
+            <span>Ticker</span>
+            <strong>$CHZ</strong>
+          </div>
+          <div class="stat">
+            <span>Network</span>
+            <strong>Solana</strong>
+          </div>
+          <div class="stat">
+            <span>Deflation</span>
+            <strong>Dynamic Burns</strong>
+          </div>
+        </div>
+        <h3>Allocation Philosophy</h3>
+        <p>
+          Supply is intentionally concentrated toward liquidity depth and community expansion. Team and treasury allocations are time-locked, ensuring
+          long-term alignment. Burn reserves are reserved for milestone celebrations that simultaneously reward holders and harden scarcity.
+        </p>
+      </section>
+
+      <section>
+        <h2>Buy &amp; Entry Mechanics</h2>
+        <p>
+          Acquisition is streamlined to minimize friction for newcomers. Current OTC entry terms prioritize fair launch principles and immediate
+          liquidity support.
+        </p>
+        <ol>
+          <li>Transfer SOL to the treasury address <strong>9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP</strong></li>
+          <li>Receive $CHZ at the live OTC rate — presently 0.1 SOL equals 350,000 $CHZ.</li>
+          <li>Holder addresses are recorded for airdrop eligibility and governance onboarding.</li>
+        </ol>
+      </section>
+
+      <section>
+        <h2>Deflationary Engine</h2>
+        <p>
+          Burns are integral to Charizard Token. We deploy multi-layered scarcity mechanics that tighten circulating supply while rewarding active
+          participants.
+        </p>
+        <ul>
+          <li><strong>Auto Burns:</strong> A percentage of ecosystem fees feeds into a rolling burn queue executed weekly.</li>
+          <li><strong>Event Burns:</strong> Major milestones trigger ceremonial burns that celebrate community achievements.</li>
+          <li><strong>Quest Burns:</strong> Gamified campaigns let holders vote on targets, choosing what gets incinerated next.</li>
+        </ul>
+        <p>
+          Every burn is transparently documented, reinforcing trust and showcasing the flame’s intensity to the broader crypto audience.
+        </p>
+      </section>
+
+      <section>
+        <h2>Utility Stack</h2>
+        <p>
+          $CHZ is designed for speed and engagement. Low-cost Solana transactions enable rapid movement, while utility layers keep holders plugged into
+          the fire.
+        </p>
+        <ul>
+          <li><strong>Staking &amp; Embers:</strong> Lock $CHZ to earn ember rewards that scale during burn events.</li>
+          <li><strong>Lore-Driven NFTs:</strong> Collect Charizard-themed assets that grant Discord upgrades, merch drops, and metaverse arena access.</li>
+          <li><strong>GameFi Integrations:</strong> Battle in cross-protocol quests where performance determines burn votes and reward pools.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Roadmap Execution</h2>
+        <p>
+          Our roadmap follows the Charizard evolutionary arc, with each phase expanding capabilities while accelerating deflation.
+        </p>
+        <h3>Phase 01 // Spark</h3>
+        <ul>
+          <li>Launch $CHZ with fortified liquidity pools and transparent contracts.</li>
+          <li>Distribute genesis airdrop to validated flame-bearers.</li>
+          <li>Execute first ceremonial burn to establish the scarcity baseline.</li>
+        </ul>
+        <h3>Phase 02 // Blaze</h3>
+        <ul>
+          <li>Secure cross-exchange listings and bootstrap arbitrage incentives.</li>
+          <li>Release lore-driven NFT collections and integrate with partner GameFi titles.</li>
+          <li>Enable cross-chain bridges to invite new battlegrounds.</li>
+        </ul>
+        <h3>Phase 03 // Inferno</h3>
+        <ul>
+          <li>Transition to DAO-led governance with ember-weighted voting.</li>
+          <li>Run recurring deflation events coordinated by the community council.</li>
+          <li>Launch global raids, IRL activations, and branded experiences.
+        </ul>
+      </section>
+
+      <section>
+        <h2>Community &amp; Governance</h2>
+        <p>
+          We believe in firepower through participation. Holders shape the ecosystem, elect multisig guardians, and steer the burn cadence via on-chain
+          voting. Transparent treasury dashboards and weekly war-room calls keep every dragon rider informed.
+        </p>
+      </section>
+
+      <section>
+        <h2>Risk &amp; Disclaimer</h2>
+        <p>
+          Charizard Token is a high-volatility digital asset. Market swings, regulatory shifts, and smart contract vulnerabilities can impact value.
+          Participants should conduct independent research and only deploy capital they are prepared to risk. Team allocations are locked, but no
+          outcome is guaranteed.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      © {year} Charizard Token. Fan-made homage inspired by Charizard. Always do your own research.
+    </footer>
+
+    <Analytics />
+  </body>
+</html>
