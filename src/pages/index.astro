@@ -559,7 +559,7 @@ const currentYear = new Date().getFullYear();
             <h3 style="margin: 0; color: #fff; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Quick Buy $CHZ</h3>
           </div>
           
-          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Connect your Solana wallet and buy $CHZ instantly. No cashback calculated - bonus applied manually after purchase!</p>
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Connect your Solana wallet and buy $CHZ instantly. <span style="color: #ffd166;">Every 0.1 SOL = 10X entry</span> for the <strong style="color: #14F195;">$10,000 USD Airdrop!</strong> The more you buy, the higher your chances! 🎯</p>
           
           <!-- Wallet Connection -->
           <div id="wallet-section" style="margin-bottom: 1.5rem;">
@@ -601,7 +601,8 @@ const currentYear = new Date().getFullYear();
           <div id="conversion-box" style="background: linear-gradient(135deg, rgba(255, 121, 48, 0.15), rgba(255, 209, 102, 0.1)); border: 2px solid rgba(255, 209, 102, 0.3); border-radius: 16px; padding: 1.2rem; text-align: center; margin-bottom: 1.5rem;">
             <p style="margin: 0 0 0.3rem 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">You will receive</p>
             <p id="chz-amount-display" style="margin: 0; font-size: 2rem; font-weight: 800; color: var(--brand-ember); text-shadow: 0 0 20px rgba(255, 209, 102, 0.3);">350,000 $CHZ</p>
-            <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #14F195;">+ Manual 10% Cashback Bonus! 🔥</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #14F195;">+ 10% Cashback Bonus! 🔥</p>
+            <p id="airdrop-entries" style="margin: 0.3rem 0 0 0; font-size: 0.75rem; color: #ffd166;">🎰 1 Airdrop Entry (10X chance per 0.1 SOL)</p>
           </div>
           
           <!-- Buy Button -->
@@ -765,11 +766,21 @@ const currentYear = new Date().getFullYear();
       function updateConversion() {
         const solInput = document.getElementById('sol-amount');
         const chzDisplay = document.getElementById('chz-amount-display');
+        const airdropDisplay = document.getElementById('airdrop-entries');
         
         const solAmount = parseFloat(solInput.value) || 0;
         const chzAmount = Math.floor(solAmount * SOL_TO_CHZ_RATE);
+        const entries = Math.floor(solAmount / 0.1);
         
         chzDisplay.textContent = `${formatNumber(chzAmount)} $CHZ`;
+        
+        if (airdropDisplay) {
+          if (entries >= 1) {
+            airdropDisplay.textContent = `🎰 ${entries} Airdrop ${entries === 1 ? 'Entry' : 'Entries'} (${entries}0X chance to win $10,000!)`;
+          } else {
+            airdropDisplay.textContent = `🎰 Min 0.1 SOL for 10X Airdrop Entry`;
+          }
+        }
       }
 
       // Detect available wallet provider
