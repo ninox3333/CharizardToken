@@ -750,7 +750,8 @@ const currentYear = new Date().getFullYear();
       
       const DESTINATION_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
       const SOL_TO_CHZ_RATE = 3500000; // 1 SOL = 3,500,000 CHZ (sin cashback)
-      const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
+      // Using Helius free public RPC - more reliable than default Solana RPC
+      const SOLANA_RPC = "https://mainnet.helius-rpc.com/?api-key=1d8740dc-e5f4-421c-b823-e1bad1889eff";
       
       let connectedWallet = null;
       let provider = null;
