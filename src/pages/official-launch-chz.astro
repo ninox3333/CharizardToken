@@ -132,7 +132,7 @@ import Analytics from "@vercel/analytics/astro";
       <p>This will create the token with 1B supply & mint it to your wallet.</p>
 
       <div class="status-box" id="log-container">
-        <div class="log-item" id="init-log">> Initializing systems...</div>
+        <div class="log-item" id="init-log">> Awaiting ignition...</div>
       </div>
 
       <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
@@ -141,13 +141,20 @@ import Analytics from "@vercel/analytics/astro";
       
       <div id="mint-address-display" style="display:none; margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
         <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">OFFICIAL TOKEN MINT ADDRESS:</span>
-        <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;"></code>
+        <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
       </div>
     </div>
 
+    <!-- PRE-LOAD GLOBALS -->
+    <script is:inline>
+      window.global = window;
+      window.process = { env: {} };
+    </script>
+
     <script>
-      // 1. TOP LEVEL IMPORTS
       import { Buffer } from "buffer";
+      window.Buffer = Buffer;
+
       import { 
         Connection, 
         PublicKey, 
@@ -163,26 +170,8 @@ import Analytics from "@vercel/analytics/astro";
         TOKEN_PROGRAM_ID, 
         MINT_SIZE 
       } from "@solana/spl-token";
-      import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-      import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
-      import { 
-        createMetadataAccountV3, 
-        mplTokenMetadata, 
-        findMetadataPda 
-      } from "@metaplex-foundation/mpl-token-metadata";
-      import { 
-        publicKey as umiPublicKey, 
-        none,
-      } from "@metaplex-foundation/umi";
-      import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
 
-      // 2. POLYFILLS
-      window.Buffer = Buffer;
-      if (typeof window.process === 'undefined') {
-        window.process = { env: {} };
-      }
-
-      // 3. PAGE LOGIC
+      // Official Parameters
       const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
       const TOKEN_DECIMALS = 9;
       const TOTAL_SUPPLY = 1000000000;
@@ -207,32 +196,35 @@ import Analytics from "@vercel/analytics/astro";
         logContainer.scrollTop = logContainer.scrollHeight;
       }
 
-      // Signal ready
-      if (initLog) initLog.innerText = "> Systems online. Awaiting wallet connection...";
+      // Signal ready immediately
+      if (initLog) initLog.innerText = "> Engine Ready. Connect wallet to begin.";
+      console.log("CHZ Engine Initialized.");
 
       async function connect() {
-        log("Attempting to connect to Phantom...", "info");
+        console.log("Connect button clicked");
+        log("Accessing Phantom...", "info");
         try {
           const { solana } = window;
           if (solana?.isPhantom) {
             const res = await solana.connect();
             walletAddress = res.publicKey.toString();
             
-            if (walletAddress !== OWNER_WALLET) {
-              log(`CRITICAL: Connected wallet is NOT the authorized owner!`, "error");
-            }
-            
-            connectBtn.innerText = `CONNECTED: ${walletAddress.slice(0,6)}...`;
-            connectBtn.style.color = '#4caf50';
+            connectBtn.innerText = `READY: ${walletAddress.slice(0,6)}...`;
+            connectBtn.style.color = '#ff7930';
             launchBtn.disabled = false;
             metadataBtn.disabled = false;
-            log(`Authority wallet connected: ${walletAddress}`, 'success');
+            
+            if (walletAddress !== OWNER_WALLET) {
+              log(`AUTH ALERT: You are not using the owner wallet!`, "error");
+            } else {
+              log(`Authority wallet verified: ${walletAddress}`, 'success');
+            }
           } else {
-            log("Error: Phantom Wallet not found in browser.", "error");
+            log("Phantom Wallet not detected.", "error");
             window.open('https://phantom.app/', '_blank');
           }
         } catch (err) {
-          log(`Connection failed: ${err.message}`, "error");
+          log(`Connection error: ${err.message}`, "error");
         }
       }
 
@@ -244,51 +236,47 @@ import Analytics from "@vercel/analytics/astro";
         try {
           const RPC_ENDPOINTS = [
             "https://solana-rpc.publicnode.com",
-            "https://api.mainnet-beta.solana.com",
-            "https://rpc.solana.com"
+            "https://api.mainnet-beta.solana.com"
           ];
 
           let connection = null;
           for (const url of RPC_ENDPOINTS) {
             try {
-              log(`Trying node: ${url}...`, "info");
+              log(`Testing link: ${url}...`, "info");
               const conn = new Connection(url, "confirmed");
               await conn.getLatestBlockhash();
               connection = conn;
-              log(`Connected to ${url}`, "success");
+              log(`Link established: ${url}`, "success");
               break;
             } catch (e) {
-              log(`Node failure: ${e.message}`, "error");
+              log(`Link failed: ${e.message}`, "error");
             }
           }
 
-          if (!connection) throw new Error("All RPC nodes failed. Check internet connection.");
+          if (!connection) throw new Error("All network nodes failed.");
           
           const payer = new PublicKey(walletAddress);
           const mintKeypair = Keypair.generate();
-          log(`Generating secure mint account...`, "info");
+          log(`Forging secure mint account...`, "info");
 
           const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
-          const createAccountIx = SystemProgram.createAccount({
-            fromPubkey: payer,
-            newAccountPubkey: mintKeypair.publicKey,
-            space: MINT_SIZE,
-            lamports,
-            programId: TOKEN_PROGRAM_ID,
-          });
-
-          const initMintIx = createInitializeMintInstruction(
-            mintKeypair.publicKey,
-            TOKEN_DECIMALS,
-            payer,
-            payer
+          const transaction = new Transaction().add(
+            SystemProgram.createAccount({
+              fromPubkey: payer,
+              newAccountPubkey: mintKeypair.publicKey,
+              space: MINT_SIZE,
+              lamports,
+              programId: TOKEN_PROGRAM_ID,
+            }),
+            createInitializeMintInstruction(mintKeypair.publicKey, TOKEN_DECIMALS, payer, payer)
           );
 
           const ataAddress = await getAssociatedTokenAddress(mintKeypair.publicKey, payer);
-          const createAtaIx = createAssociatedTokenAccountInstruction(payer, ataAddress, payer, mintKeypair.publicKey);
-          const mintToIx = createMintToInstruction(mintKeypair.publicKey, ataAddress, payer, TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS));
+          transaction.add(
+            createAssociatedTokenAccountInstruction(payer, ataAddress, payer, mintKeypair.publicKey),
+            createMintToInstruction(mintKeypair.publicKey, ataAddress, payer, TOTAL_SUPPLY * Math.pow(10, TOKEN_DECIMALS))
+          );
 
-          const transaction = new Transaction().add(createAccountIx, initMintIx, createAtaIx, mintToIx);
           const { blockhash } = await connection.getLatestBlockhash();
           transaction.recentBlockhash = blockhash;
           transaction.feePayer = payer;
@@ -297,31 +285,35 @@ import Analytics from "@vercel/analytics/astro";
           log("PLEASE SIGN IN PHANTOM...", "info");
           const { signature } = await window.solana.signAndSendTransaction(transaction);
           
-          log(`Transaction sent! Confirming...`, "info");
+          log(`Vortex active! Confirming...`, "info");
           await connection.confirmTransaction(signature);
           
           currentMint = mintKeypair.publicKey.toString();
-          log("🔥 TOKEN CREATED!", "success");
+          log("🔥 TOKEN CREATED SUCCESSFULLY!", "success");
           
           mintDisplay.style.display = 'block';
           mintCode.innerText = currentMint;
-          log("Proceed to Step 3 for Name and Logo.", "success");
 
         } catch (err) {
-          log(`Deployment failed: ${err.message}`, "error");
+          log(`Action failed: ${err.message}`, "error");
           launchBtn.disabled = false;
         }
       }
 
       async function registerMetadata() {
-        if (!walletAddress) {
-          log("Error: Connect wallet first!", "error");
-          return;
-        }
+        if (!walletAddress) return;
         metadataBtn.disabled = true;
-        log("Opening Metaplex connection...", "info");
+        log("Loading Metaplex Modules (Step 3)...", "info");
 
         try {
+          // DYNAMIC IMPORTS TO PREVENT BLOCKING
+          const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
+          const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
+          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
+          const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
+          const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
+
+          log("Connecting to Metaplex...", "info");
           const umi = createUmi("https://solana-rpc.publicnode.com")
             .use(mplTokenMetadata())
             .use(walletAdapterIdentity(window.solana));
@@ -329,7 +321,6 @@ import Analytics from "@vercel/analytics/astro";
           const mint = umiPublicKey(currentMint);
           const metadata = findMetadataPda(umi, { mint });
 
-          log(`Mint: ${currentMint}`, "info");
           log(`Registering: Charizard Token ($CHZ)...`, "info");
 
           const transaction = createMetadataAccountV3(umi, {
@@ -351,25 +342,24 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("SIGN IN PHANTOM TO CONFIRM NAME & LOGO...", "info");
+          log("SIGN IN PHANTOM TO CONFIRM...", "info");
           await transaction.sendAndConfirm(umi);
           
-          log("🔥 METADATA REGISTERED!", "success");
-          log("Wallets will update soon with the logo.", "success");
-          metadataBtn.innerText = "SUCCESSFUL";
+          log("🔥 BRANDING REGISTERED!", "success");
+          metadataBtn.innerText = "DONE";
 
         } catch (err) {
-          log(`Metadata error: ${err.message}`, "error");
+          log(`Metadata Error: ${err.message}`, "error");
           metadataBtn.disabled = false;
         }
       }
 
-      connectBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        connect();
-      });
-      launchBtn.addEventListener('click', launch);
-      metadataBtn.addEventListener('click', registerMetadata);
+      // ATTACH EVENTS WITH DOM PROTECTION
+      window.onload = () => {
+        connectBtn.addEventListener('click', connect);
+        launchBtn.addEventListener('click', launch);
+        metadataBtn.addEventListener('click', registerMetadata);
+      };
     </script>
   </body>
 </html>
