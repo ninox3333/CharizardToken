@@ -552,16 +552,111 @@ const currentYear = new Date().getFullYear();
           </div>
         </div>
 
+        <!-- QUICK BUY WIDGET -->
+        <div id="quick-buy-widget" style="background: linear-gradient(165deg, rgba(20, 5, 40, 0.95), rgba(40, 10, 60, 0.9)); border: 2px solid rgba(255, 121, 48, 0.5); border-radius: 24px; padding: 2rem; margin-top: 1.5rem; box-shadow: 0 0 40px rgba(255, 76, 32, 0.25);">
+          <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+            <span style="font-size: 1.5rem;">🚀</span>
+            <h3 style="margin: 0; color: #fff; font-size: 1.4rem; text-transform: uppercase; letter-spacing: 0.05em;">Quick Buy $CHZ</h3>
+          </div>
+          
+          <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">Connect your Solana wallet and buy $CHZ instantly. No cashback calculated - bonus applied manually after purchase!</p>
+          
+          <!-- Wallet Connection -->
+          <div id="wallet-section" style="margin-bottom: 1.5rem;">
+            <button id="connect-wallet-btn" style="width: 100%; background: linear-gradient(135deg, #9945FF, #14F195); color: #000; padding: 1rem; border-radius: 12px; font-weight: 800; font-size: 1rem; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 0.5rem; transition: all 0.3s ease;">
+              <svg width="20" height="20" viewBox="0 0 128 128" fill="none"><defs><linearGradient id="solGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#9945FF"/><stop offset="100%" style="stop-color:#14F195"/></linearGradient></defs><circle cx="64" cy="64" r="64" fill="url(#solGrad)"/><path d="M93.5 66.8l-8.3 8.5c-.4.4-.9.6-1.4.6H34.2c-.9 0-1.3-1-.7-1.6l8.3-8.5c.4-.4.9-.6 1.4-.6h49.6c.9 0 1.3 1.1.7 1.6zm-8.3-21.9l-8.3 8.5c-.4.4-.9.6-1.4.6H26c-.9 0-1.3-1-.7-1.6l8.3-8.5c.4-.4.9-.6 1.4-.6h49.5c.9 0 1.4 1.1.8 1.6zm8.3 43.8l-8.3 8.5c-.4.4-.9.6-1.4.6H34.2c-.9 0-1.3-1-.7-1.6l8.3-8.5c.4-.4.9-.6 1.4-.6h49.6c.9 0 1.3 1.1.7 1.6z" fill="#fff"/></svg>
+              Connect Wallet
+            </button>
+            <div id="wallet-connected" style="display: none; background: rgba(20, 241, 149, 0.1); border: 1px solid #14F195; border-radius: 12px; padding: 0.8rem 1rem;">
+              <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <span style="width: 10px; height: 10px; background: #14F195; border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                  <span style="color: #14F195; font-weight: 600; font-size: 0.9rem;">Connected:</span>
+                  <span id="wallet-address-display" style="color: #fff; font-family: monospace; font-size: 0.85rem;"></span>
+                </div>
+                <button id="disconnect-wallet-btn" style="background: rgba(255, 76, 32, 0.2); border: 1px solid rgba(255, 76, 32, 0.5); color: #ff7930; padding: 0.4rem 0.8rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer;">Disconnect</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Amount Input -->
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-size: 0.85rem; text-transform: uppercase; color: var(--brand-ember); margin-bottom: 0.5rem; font-weight: 600; letter-spacing: 0.03em;">Amount in SOL</label>
+            <div style="position: relative;">
+              <input type="number" id="sol-amount" placeholder="0.1" step="0.01" min="0.01" value="0.1" style="width: 100%; background: rgba(0, 0, 0, 0.4); border: 2px solid rgba(255, 121, 48, 0.3); padding: 1rem 1.2rem; padding-right: 60px; border-radius: 12px; color: #fff; font-size: 1.3rem; font-weight: 700; outline: none; transition: border-color 0.2s;"/>
+              <span style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); color: var(--brand-ember); font-weight: 700;">SOL</span>
+            </div>
+          </div>
+          
+          <!-- Quick Amount Buttons -->
+          <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+            <button class="quick-amount-btn" data-amount="0.1" style="flex: 1; min-width: 60px; background: rgba(255, 121, 48, 0.15); border: 1px solid rgba(255, 121, 48, 0.4); color: var(--brand-ember); padding: 0.6rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;">0.1</button>
+            <button class="quick-amount-btn" data-amount="0.5" style="flex: 1; min-width: 60px; background: rgba(255, 121, 48, 0.15); border: 1px solid rgba(255, 121, 48, 0.4); color: var(--brand-ember); padding: 0.6rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;">0.5</button>
+            <button class="quick-amount-btn" data-amount="1" style="flex: 1; min-width: 60px; background: rgba(255, 121, 48, 0.15); border: 1px solid rgba(255, 121, 48, 0.4); color: var(--brand-ember); padding: 0.6rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;">1</button>
+            <button class="quick-amount-btn" data-amount="2" style="flex: 1; min-width: 60px; background: rgba(255, 121, 48, 0.15); border: 1px solid rgba(255, 121, 48, 0.4); color: var(--brand-ember); padding: 0.6rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;">2</button>
+            <button class="quick-amount-btn" data-amount="5" style="flex: 1; min-width: 60px; background: rgba(255, 121, 48, 0.15); border: 1px solid rgba(255, 121, 48, 0.4); color: var(--brand-ember); padding: 0.6rem; border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s;">5</button>
+          </div>
+          
+          <!-- Conversion Display -->
+          <div id="conversion-box" style="background: linear-gradient(135deg, rgba(255, 121, 48, 0.15), rgba(255, 209, 102, 0.1)); border: 2px solid rgba(255, 209, 102, 0.3); border-radius: 16px; padding: 1.2rem; text-align: center; margin-bottom: 1.5rem;">
+            <p style="margin: 0 0 0.3rem 0; font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">You will receive</p>
+            <p id="chz-amount-display" style="margin: 0; font-size: 2rem; font-weight: 800; color: var(--brand-ember); text-shadow: 0 0 20px rgba(255, 209, 102, 0.3);">350,000 $CHZ</p>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.8rem; color: #14F195;">+ Manual 10% Cashback Bonus! 🔥</p>
+          </div>
+          
+          <!-- Buy Button -->
+          <button id="buy-chz-btn" disabled style="width: 100%; background: linear-gradient(90deg, #ff7930, #ff4c20); color: #100307; padding: 1.2rem; border-radius: 14px; font-weight: 900; font-size: 1.2rem; text-transform: uppercase; letter-spacing: 0.05em; border: none; cursor: pointer; opacity: 0.6; transition: all 0.3s ease; box-shadow: 0 4px 20px rgba(255, 76, 32, 0.4);">
+            🔒 Connect Wallet First
+          </button>
+          
+          <!-- Transaction Status -->
+          <div id="tx-status" style="margin-top: 1rem; text-align: center; min-height: 1.5rem;">
+            <p id="tx-message" style="margin: 0; font-size: 0.9rem; color: var(--text-muted);"></p>
+          </div>
+          
+          <!-- Security Notice -->
+          <div style="margin-top: 1rem; padding: 0.8rem; background: rgba(255, 255, 255, 0.03); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05);">
+            <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted); text-align: center;">
+              🔐 Secure transaction via Solana blockchain. Treasury: <span style="font-family: monospace; color: var(--brand-ember);">9Vsan6...J5wP</span>
+            </p>
+          </div>
+        </div>
+
         <style>
           @keyframes pulse-border {
             0% { box-shadow: 0 0 30px rgba(255, 121, 48, 0.3); }
             50% { box-shadow: 0 0 60px rgba(255, 121, 48, 0.6); }
             100% { box-shadow: 0 0 30px rgba(255, 121, 48, 0.3); }
           }
+          
+          #sol-amount:focus {
+            border-color: var(--brand-fire);
+            box-shadow: 0 0 15px rgba(255, 121, 48, 0.3);
+          }
+          
+          .quick-amount-btn:hover {
+            background: rgba(255, 121, 48, 0.3) !important;
+            transform: translateY(-2px);
+          }
+          
+          #buy-chz-btn:not(:disabled) {
+            opacity: 1;
+            cursor: pointer;
+          }
+          
+          #buy-chz-btn:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(255, 76, 32, 0.5);
+          }
+          
+          #connect-wallet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(153, 69, 255, 0.4);
+          }
         </style>
 
         <p style="margin-top: 0.5rem; font-weight: 700; color: #fff;">
-          0.1 SOL = 385,000 $CHZ (incl. BONUS)
+          0.1 SOL = 350,000 $CHZ (base rate)
         </p>
       </div>
     </header>
@@ -649,28 +744,270 @@ const currentYear = new Date().getFullYear();
     <Analytics />
 
     <script>
-      import { 
-        Connection, 
-        PublicKey, 
-        Transaction, 
-        SystemProgram, 
-        LAMPORTS_PER_SOL 
-      } from "@solana/web3.js";
-
+      // ============================================
+      // CHARIZARD TOKEN - SOLANA WALLET INTEGRATION
+      // ============================================
+      
       const DESTINATION_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
-      const MINT_ADDRESS = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
-      const SOL_TO_CHZ_RATE = 3500000; // 1 SOL = 3,500,000 CHZ
-      const CASHBACK_BONUS = 1.1; // 10% bonus
+      const SOL_TO_CHZ_RATE = 3500000; // 1 SOL = 3,500,000 CHZ (sin cashback)
+      const SOLANA_RPC = "https://api.mainnet-beta.solana.com";
+      
+      let connectedWallet = null;
+      let provider = null;
 
-      let walletAddress = null;
+      // Format number with commas
+      function formatNumber(num) {
+        return num.toLocaleString('en-US');
+      }
 
+      // Update CHZ display based on SOL amount
+      function updateConversion() {
+        const solInput = document.getElementById('sol-amount');
+        const chzDisplay = document.getElementById('chz-amount-display');
+        
+        const solAmount = parseFloat(solInput.value) || 0;
+        const chzAmount = Math.floor(solAmount * SOL_TO_CHZ_RATE);
+        
+        chzDisplay.textContent = `${formatNumber(chzAmount)} $CHZ`;
+      }
 
-      // Add Copy Click for manual wallet
-      document.getElementById('manual-wallet-big').addEventListener('click', function() {
-        navigator.clipboard.writeText(this.innerText);
-        const originalText = this.innerText;
-        this.innerText = "WALLET ADDRESS COPIED!";
-        setTimeout(() => this.innerText = originalText, 2000);
+      // Detect available wallet provider
+      function getProvider() {
+        if (window.phantom?.solana?.isPhantom) {
+          return window.phantom.solana;
+        }
+        if (window.solflare?.isSolflare) {
+          return window.solflare;
+        }
+        if (window.solana?.isPhantom) {
+          return window.solana;
+        }
+        if (window.solana) {
+          return window.solana;
+        }
+        return null;
+      }
+
+      // Connect wallet
+      async function connectWallet() {
+        const txMessage = document.getElementById('tx-message');
+        
+        try {
+          provider = getProvider();
+          
+          if (!provider) {
+            // No wallet found - redirect to Phantom download
+            txMessage.textContent = "⚠️ No Solana wallet detected. Redirecting to Phantom...";
+            txMessage.style.color = "#ff7930";
+            setTimeout(() => {
+              window.open('https://phantom.app/', '_blank');
+            }, 1500);
+            return;
+          }
+
+          txMessage.textContent = "🔄 Connecting wallet...";
+          txMessage.style.color = "#14F195";
+
+          const response = await provider.connect();
+          connectedWallet = response.publicKey.toString();
+
+          // Update UI
+          document.getElementById('connect-wallet-btn').style.display = 'none';
+          document.getElementById('wallet-connected').style.display = 'block';
+          document.getElementById('wallet-address-display').textContent = 
+            connectedWallet.slice(0, 4) + '...' + connectedWallet.slice(-4);
+          
+          // Enable buy button
+          const buyBtn = document.getElementById('buy-chz-btn');
+          buyBtn.disabled = false;
+          buyBtn.textContent = "🔥 BUY $CHZ NOW";
+          
+          txMessage.textContent = "✅ Wallet connected successfully!";
+          setTimeout(() => { txMessage.textContent = ""; }, 3000);
+
+        } catch (err) {
+          console.error('Wallet connection error:', err);
+          txMessage.textContent = "❌ Connection failed: " + (err.message || "User rejected");
+          txMessage.style.color = "#ff4c20";
+        }
+      }
+
+      // Disconnect wallet
+      function disconnectWallet() {
+        if (provider && provider.disconnect) {
+          provider.disconnect();
+        }
+        
+        connectedWallet = null;
+        provider = null;
+
+        // Update UI
+        document.getElementById('connect-wallet-btn').style.display = 'flex';
+        document.getElementById('wallet-connected').style.display = 'none';
+        
+        const buyBtn = document.getElementById('buy-chz-btn');
+        buyBtn.disabled = true;
+        buyBtn.textContent = "🔒 Connect Wallet First";
+        
+        document.getElementById('tx-message').textContent = "";
+      }
+
+      // Execute purchase transaction
+      async function buyTokens() {
+        const txMessage = document.getElementById('tx-message');
+        const buyBtn = document.getElementById('buy-chz-btn');
+        const solInput = document.getElementById('sol-amount');
+        
+        if (!provider || !connectedWallet) {
+          txMessage.textContent = "❌ Please connect your wallet first";
+          txMessage.style.color = "#ff4c20";
+          return;
+        }
+
+        const solAmount = parseFloat(solInput.value);
+        
+        if (!solAmount || solAmount < 0.01) {
+          txMessage.textContent = "❌ Minimum amount is 0.01 SOL";
+          txMessage.style.color = "#ff4c20";
+          return;
+        }
+
+        try {
+          buyBtn.disabled = true;
+          buyBtn.textContent = "⏳ Processing...";
+          txMessage.textContent = "🔄 Creating transaction...";
+          txMessage.style.color = "#ffd166";
+
+          // Create connection
+          const { Connection, PublicKey, Transaction, SystemProgram, LAMPORTS_PER_SOL } = await import('@solana/web3.js');
+          const connection = new Connection(SOLANA_RPC, 'confirmed');
+
+          // Calculate lamports
+          const lamports = Math.floor(solAmount * LAMPORTS_PER_SOL);
+          
+          // Create transaction
+          const fromPubkey = new PublicKey(connectedWallet);
+          const toPubkey = new PublicKey(DESTINATION_WALLET);
+
+          const transaction = new Transaction().add(
+            SystemProgram.transfer({
+              fromPubkey,
+              toPubkey,
+              lamports
+            })
+          );
+
+          // Get latest blockhash
+          const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+          transaction.recentBlockhash = blockhash;
+          transaction.feePayer = fromPubkey;
+
+          txMessage.textContent = "✍️ Please approve the transaction in your wallet...";
+          txMessage.style.color = "#14F195";
+
+          // Sign and send transaction
+          const signed = await provider.signAndSendTransaction(transaction);
+          
+          txMessage.textContent = "⏳ Confirming transaction...";
+          
+          // Wait for confirmation
+          const confirmation = await connection.confirmTransaction({
+            signature: signed.signature,
+            blockhash,
+            lastValidBlockHeight
+          });
+
+          if (confirmation.value.err) {
+            throw new Error("Transaction failed on chain");
+          }
+
+          // Success!
+          const chzAmount = formatNumber(Math.floor(solAmount * SOL_TO_CHZ_RATE));
+          txMessage.innerHTML = `
+            <span style="color: #14F195;">✅ Transaction successful!</span><br>
+            <span style="font-size: 0.8rem;">You will receive <strong>${chzAmount} $CHZ</strong> + 10% cashback bonus!</span><br>
+            <a href="https://solscan.io/tx/${signed.signature}" target="_blank" style="color: var(--brand-ember); font-size: 0.8rem;">View on Solscan →</a>
+          `;
+          
+          buyBtn.textContent = "🔥 BUY MORE $CHZ";
+          buyBtn.disabled = false;
+
+        } catch (err) {
+          console.error('Transaction error:', err);
+          
+          let errorMessage = "Transaction failed";
+          if (err.message?.includes("User rejected")) {
+            errorMessage = "Transaction cancelled by user";
+          } else if (err.message?.includes("insufficient")) {
+            errorMessage = "Insufficient SOL balance";
+          } else if (err.message) {
+            errorMessage = err.message;
+          }
+          
+          txMessage.textContent = "❌ " + errorMessage;
+          txMessage.style.color = "#ff4c20";
+          
+          buyBtn.textContent = "🔥 BUY $CHZ NOW";
+          buyBtn.disabled = false;
+        }
+      }
+
+      // Initialize event listeners when DOM is ready
+      document.addEventListener('DOMContentLoaded', () => {
+        // SOL input change
+        const solInput = document.getElementById('sol-amount');
+        if (solInput) {
+          solInput.addEventListener('input', updateConversion);
+        }
+
+        // Quick amount buttons
+        document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const amount = btn.getAttribute('data-amount');
+            if (solInput) {
+              solInput.value = amount;
+              updateConversion();
+            }
+          });
+        });
+
+        // Connect wallet button
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        if (connectBtn) {
+          connectBtn.addEventListener('click', connectWallet);
+        }
+
+        // Disconnect wallet button
+        const disconnectBtn = document.getElementById('disconnect-wallet-btn');
+        if (disconnectBtn) {
+          disconnectBtn.addEventListener('click', disconnectWallet);
+        }
+
+        // Buy button
+        const buyBtn = document.getElementById('buy-chz-btn');
+        if (buyBtn) {
+          buyBtn.addEventListener('click', buyTokens);
+        }
+
+        // Manual wallet copy
+        const manualWallet = document.getElementById('manual-wallet-big');
+        if (manualWallet) {
+          manualWallet.addEventListener('click', function() {
+            navigator.clipboard.writeText(this.innerText);
+            const originalText = this.innerText;
+            this.innerText = "✅ WALLET ADDRESS COPIED!";
+            this.style.background = "rgba(20, 241, 149, 0.2)";
+            this.style.borderColor = "#14F195";
+            setTimeout(() => {
+              this.innerText = originalText;
+              this.style.background = "#110a1a";
+              this.style.borderColor = "rgba(255,153,71,0.3)";
+            }, 2000);
+          });
+        }
+
+        // Initial conversion update
+        updateConversion();
       });
     </script>
   </body>
