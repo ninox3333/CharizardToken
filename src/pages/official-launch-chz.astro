@@ -149,11 +149,17 @@ import Analytics from "@vercel/analytics/astro";
     <script is:inline>
       window.global = window;
       window.process = { env: {} };
+      if (typeof window.EventEmitter === 'undefined') {
+        window.EventEmitter = function() {};
+        window.EventEmitter.prototype.on = function() {};
+        window.EventEmitter.prototype.emit = function() {};
+      }
     </script>
 
     <script>
       import { Buffer } from "buffer";
       window.Buffer = Buffer;
+      globalThis.Buffer = Buffer;
 
       import { 
         Connection, 
@@ -198,10 +204,8 @@ import Analytics from "@vercel/analytics/astro";
 
       // Signal ready immediately
       if (initLog) initLog.innerText = "> Engine Ready. Connect wallet to begin.";
-      console.log("CHZ Engine Initialized.");
 
       async function connect() {
-        console.log("Connect button clicked");
         log("Accessing Phantom...", "info");
         try {
           const { solana } = window;
@@ -215,50 +219,28 @@ import Analytics from "@vercel/analytics/astro";
             metadataBtn.disabled = false;
             
             if (walletAddress !== OWNER_WALLET) {
-              log(`AUTH ALERT: You are not using the owner wallet!`, "error");
+              log(`AUTH ALERT: Wallet mismatch!`, "error");
             } else {
-              log(`Authority wallet verified: ${walletAddress}`, 'success');
+              log(`Authority verified.`, 'success');
             }
           } else {
-            log("Phantom Wallet not detected.", "error");
+            log("Phantom not found.", "error");
             window.open('https://phantom.app/', '_blank');
           }
         } catch (err) {
-          log(`Connection error: ${err.message}`, "error");
+          log(`Connection failed: ${err.message}`, "error");
         }
       }
 
       async function launch() {
         if (!walletAddress) return;
         launchBtn.disabled = true;
-        log("Official Ignition sequence initiated...", "info");
+        log("Ignition sequence...", "info");
 
         try {
-          const RPC_ENDPOINTS = [
-            "https://solana-rpc.publicnode.com",
-            "https://api.mainnet-beta.solana.com"
-          ];
-
-          let connection = null;
-          for (const url of RPC_ENDPOINTS) {
-            try {
-              log(`Testing link: ${url}...`, "info");
-              const conn = new Connection(url, "confirmed");
-              await conn.getLatestBlockhash();
-              connection = conn;
-              log(`Link established: ${url}`, "success");
-              break;
-            } catch (e) {
-              log(`Link failed: ${e.message}`, "error");
-            }
-          }
-
-          if (!connection) throw new Error("All network nodes failed.");
-          
+          const connection = new Connection("https://solana-rpc.publicnode.com", "confirmed");
           const payer = new PublicKey(walletAddress);
           const mintKeypair = Keypair.generate();
-          log(`Forging secure mint account...`, "info");
-
           const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
           const transaction = new Transaction().add(
             SystemProgram.createAccount({
@@ -284,18 +266,14 @@ import Analytics from "@vercel/analytics/astro";
 
           log("PLEASE SIGN IN PHANTOM...", "info");
           const { signature } = await window.solana.signAndSendTransaction(transaction);
-          
-          log(`Vortex active! Confirming...`, "info");
           await connection.confirmTransaction(signature);
           
           currentMint = mintKeypair.publicKey.toString();
-          log("🔥 TOKEN CREATED SUCCESSFULLY!", "success");
-          
+          log("🔥 TOKEN CREATED!", "success");
           mintDisplay.style.display = 'block';
           mintCode.innerText = currentMint;
-
         } catch (err) {
-          log(`Action failed: ${err.message}`, "error");
+          log(`Error: ${err.message}`, "error");
           launchBtn.disabled = false;
         }
       }
@@ -303,15 +281,23 @@ import Analytics from "@vercel/analytics/astro";
       async function registerMetadata() {
         if (!walletAddress) return;
         metadataBtn.disabled = true;
-        log("Loading Metaplex Modules (Step 3)...", "info");
+        log("Loading Step 3 Modules...", "info");
 
         try {
-          // DYNAMIC IMPORTS TO PREVENT BLOCKING
-          const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
-          const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
-          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
+          // Dynamic Import is safer to catch errors
+          console.log("Starting dynamic imports...");
+          const [UMI, PLUG, META, ADAPT] = await Promise.all([
+            import("@metaplex-foundation/umi-bundle-defaults"),
+            import("@metaplex-foundation/umi-signer-wallet-adapters"),
+            import("@metaplex-foundation/mpl-token-metadata"),
+            import("@metaplex-foundation/umi-web3js-adapters")
+          ]);
           const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
-          const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
+
+          const { createUmi } = UMI;
+          const { walletAdapterIdentity } = PLUG;
+          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = META;
+          const { fromWeb3JsPublicKey } = ADAPT;
 
           log("Connecting to Metaplex...", "info");
           const umi = createUmi("https://solana-rpc.publicnode.com")
@@ -322,7 +308,6 @@ import Analytics from "@vercel/analytics/astro";
           const metadata = findMetadataPda(umi, { mint });
 
           log(`Registering: Charizard Token ($CHZ)...`, "info");
-
           const transaction = createMetadataAccountV3(umi, {
             metadata,
             mint,
@@ -342,24 +327,22 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("SIGN IN PHANTOM TO CONFIRM...", "info");
+          log("SIGN IN PHANTOM...", "info");
           await transaction.sendAndConfirm(umi);
-          
           log("🔥 BRANDING REGISTERED!", "success");
           metadataBtn.innerText = "DONE";
-
         } catch (err) {
-          log(`Metadata Error: ${err.message}`, "error");
+          log(`Final Step Error: ${err.message}`, "error");
+          console.error(err);
           metadataBtn.disabled = false;
         }
       }
 
-      // ATTACH EVENTS WITH DOM PROTECTION
-      window.onload = () => {
+      window.addEventListener('load', () => {
         connectBtn.addEventListener('click', connect);
         launchBtn.addEventListener('click', launch);
         metadataBtn.addEventListener('click', registerMetadata);
-      };
+      });
     </script>
   </body>
 </html>
