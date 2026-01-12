@@ -132,7 +132,7 @@ import Analytics from "@vercel/analytics/astro";
       <p>This will create the token with 1B supply & mint it to your wallet.</p>
 
       <div class="status-box" id="log-container">
-        <div class="log-item">Awaiting authorized connection...</div>
+        <div class="log-item" id="init-log">> Initializing systems...</div>
       </div>
 
       <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
@@ -146,8 +146,11 @@ import Analytics from "@vercel/analytics/astro";
     </div>
 
     <script>
+      console.log("CHZ Launchpad: Script starting...");
       import { Buffer } from "buffer";
       window.Buffer = Buffer;
+      
+      document.getElementById('init-log').innerText = "> Systems ready. Awaiting wallet...";
 
       import { 
         Connection, 
