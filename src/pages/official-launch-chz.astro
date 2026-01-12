@@ -211,7 +211,7 @@ import Analytics from "@vercel/analytics/astro";
         log("Official Ignition sequence initiated...", "info");
 
         try {
-          const connection = new Connection("https://api.mainnet-beta.solana.com", "confirmed");
+          const connection = new Connection("https://rpc.ankr.com/solana", "confirmed");
           const payer = new PublicKey(walletAddress);
           
           // 1. Generate Mint Keypair
