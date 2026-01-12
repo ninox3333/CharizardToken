@@ -173,9 +173,9 @@ import Analytics from "@vercel/analytics/astro";
       } from "@metaplex-foundation/mpl-token-metadata";
       import { 
         publicKey as umiPublicKey, 
-        none,
-        fromWeb3JsPublicKey
+        none
       } from "@metaplex-foundation/umi";
+      import { fromWeb3JsPublicKey } from "@metaplex-foundation/umi-web3js-adapters";
 
       // Official Parameters
       const OWNER_WALLET = "9Vsan6w7QaGHDEbF1JcgruDVcbsS3xkEMgeZmAQGJ5wP";
