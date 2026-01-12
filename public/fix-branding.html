@@ -1,83 +1,134 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>CHZ Emergency Branding Tool</title>
+    <title>CHZ Branding: Final Guide</title>
     <style>
-        body { background: #050309; color: #fff; font-family: sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
-        .box { background: rgba(255,121,48,0.1); border: 2px solid #ff7930; padding: 30px; border-radius: 20px; text-align: center; max-width: 450px; }
-        button { background: #ff7930; color: #000; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; margin: 10px; width: 100%; font-size: 16px; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #status { margin-top: 20px; font-family: monospace; font-size: 14px; background: #000; padding: 15px; border-radius: 10px; text-align: left; max-height: 150px; overflow-y: auto; }
-        .success { color: #4caf50; }
-        .error { color: #f44336; }
-    </style>
-    <!-- Load Solana Web3.js from CDN -->
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-    <!-- We will use a script that manually builds the Metaplex instruction to avoid library bloat -->
-</head>
-<body>
-    <div class="box">
-        <h2 style="color: #ff7930; margin-top: 0;">BRANDING TOOL ($CHZ)</h2>
-        <p style="font-size: 14px; opacity: 0.8;">Use this for branding if the main panel fails. Make sure you are using the owner wallet.</p>
-        
-        <button id="connectBtn">1. CONNECT PHANTOM</button>
-        <button id="brandBtn" disabled>2. REGISTER NAME & LOGO</button>
-
-        <div id="status">Ready...</div>
-        
-        <p style="font-size: 12px; margin-top: 20px; opacity: 0.5;">Mint: 7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</p>
-    </div>
-
-    <script>
-        const MINT = "7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe";
-        const METADATA_URL = "https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json";
-        
-        const status = document.getElementById('status');
-        const connectBtn = document.getElementById('connectBtn');
-        const brandBtn = document.getElementById('brandBtn');
-
-        function log(msg, color='') {
-            const div = document.createElement('div');
-            div.innerText = "> " + msg;
-            if (color) div.className = color;
-            status.appendChild(div);
-            status.scrollTop = status.scrollHeight;
+        body {
+            background: #050309;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
         }
 
-        connectBtn.onclick = async () => {
-            if (!window.solana) return log("Phantom not found!", "error");
-            try {
-                const res = await window.solana.connect();
-                connectBtn.innerText = "CONNECTED: " + res.publicKey.toString().slice(0,8) + "...";
-                brandBtn.disabled = false;
-                log("Wallet connected: " + res.publicKey.toString(), "success");
-            } catch (e) { log(e.message, "error"); }
-        };
+        .container {
+            background: rgba(17, 10, 26, 0.9);
+            border: 2px solid #ff7930;
+            padding: 40px;
+            border-radius: 30px;
+            max-width: 600px;
+            box-shadow: 0 0 50px rgba(255, 121, 48, 0.2);
+        }
 
-        brandBtn.onclick = async () => {
-            brandBtn.disabled = true;
-            log("Initializing branding sequence...");
-            
-            try {
-                // Since bundling is failing, we guide the user to the most stable 1-click tool 
-                // but this time explaining WHY (blockchain security).
-                log("Finalizing branding requires a secure interaction.");
-                
-                // Let's provide a raw link to the most Direct blockchain write tool that Solscan uses:
-                const writeUrl = `https://v1.slr.tools/token-branding?mint=${MINT}&name=Charizard+Token&symbol=CHZ&uri=${encodeURIComponent(METADATA_URL)}`;
-                
-                log("Opening secure branding link...", "success");
-                setTimeout(() => {
-                    window.open(writeUrl, '_blank');
-                    log("A new window opened. Just connect and click 'Create Metadata' there.", "success");
-                    log("This tool uses the exact same protocol but without browser errors.");
-                }, 1000);
+        h1 {
+            color: #ff7930;
+            text-align: center;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
 
-            } catch (e) {
-                log(e.message, "error");
-                brandBtn.disabled = false;
-            }
-        };
-    </script>
+        .option {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #ff7930;
+        }
+
+        .option h3 {
+            margin: 0 0 10px 0;
+            color: #ffd166;
+        }
+
+        .option p {
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: #ff7930;
+            color: #000;
+            text-decoration: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+
+        code {
+            background: #000;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #fff;
+            border: 1px solid #333;
+        }
+
+        .important {
+            color: #ff7930;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>BRANDING FINAL STEP</h1>
+        <p style="text-align: center; font-size: 14px; opacity: 0.7; margin-bottom: 30px;">
+            The browser code is hitting a technical block. To finalize your token <span
+                class="important">OFFICIALLY</span> across All Explorers and Wallets, use one of these verified Solana
+            tools.
+        </p>
+
+        <div class="option">
+            <h3>Option 1: Smithii (Audited & Reliable)</h3>
+            <p>The most widely used "no-code" tool for updating token metadata. It is audited and safe.</p>
+            <p><strong>Fee:</strong> ~0.1 SOL</p>
+            <a href="https://smithii.io/update-solana-token-metadata/" target="_blank" class="btn">Go to Smithii</a>
+        </div>
+
+        <div class="option">
+            <h3>Option 2: Sollr (Fast & Direct)</h3>
+            <p>Specialized in updating metadata for existing tokens. Very straightforward UI.</p>
+            <p><strong>Fee:</strong> Network Fees only</p>
+            <a href="https://solr.network/tools/token-update" target="_blank" class="btn">Go to Solr Network</a>
+        </div>
+
+        <div class="option">
+            <h3>Option 3: DexArea (Lightweight)</h3>
+            <p>A simple, direct dApp to update your token's name, symbol, and image.</p>
+            <p><strong>Fee:</strong> Minimal</p>
+            <a href="https://dexarea.com/solana-token-metadata" target="_blank" class="btn">Go to DexArea</a>
+        </div>
+
+        <div
+            style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 10px; font-size: 12px; border-top: 1px solid #333;">
+            <p><strong>Data for the forms:</strong></p>
+            • Mint: <code>7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code><br />
+            • Name: <code>Charizard Token</code> | Symbol: <code>CHZ</code><br />
+            • Image Link:
+            <code>https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/assets/logo.png</code><br />
+            • Metadata JSON:
+            <code>https://raw.githubusercontent.com/ninox3333/CharizardToken/main/public/metadata.json</code>
+        </div>
+
+        <p style="text-align: center; margin-top: 20px;"><a href="/" style="color: #fff; font-size: 12px;">← Back to
+                Main Page</a></p>
+    </div>
 </body>
+
 </html>
