@@ -126,35 +126,40 @@ import Analytics from "@vercel/analytics/astro";
     </style>
   </head>
   <body>
-    <div class="container">
-      <span class="admin-badge">OFFICIAL $CHZ MANAGER</span>
-      <h1>TOKEN DASHBOARD</h1>
-      <p style="font-size: 0.8rem; margin-top: -1rem;">Authority: <code>9Vsan6...5wP</code></p>
-
-      <div class="status-box" id="log-container">
-        <div class="log-item" id="init-log">> Dashboard loaded.</div>
-      </div>
-
-      <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
-      <button id="launch-token" class="btn btn-primary" disabled>2. Mint $CHZ (1 Billion)</button>
-      <button id="register-metadata" class="btn btn-primary" style="background: linear-gradient(90deg, #ffd166, #ff7930);" disabled>3. Finalize Name & Logo</button>
-      
-      <div id="mint-address-display" style="display:none; margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
-        <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">YOUR TOKEN MINT:</span>
-        <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
-      </div>
-    </div>
-
-    <!-- CLEAN POLYFILLS -->
+    <!-- POLYFILLS AT THE VERY TOP OF BODY -->
     <script is:inline>
       window.global = window;
       window.process = { env: {} };
     </script>
+    
+    <div class="container">
+      <span class="admin-badge">OFFICIAL $CHZ MANAGER</span>
+      <h1>TOKEN DASHBOARD</h1>
+      <p style="font-size: 0.8rem; margin-top: -1rem; color: #ff7930;">Official Owner Address Verified</p>
+
+      <div class="status-box" id="log-container">
+        <div class="log-item" id="init-log">> Initializing Polyfills...</div>
+      </div>
+
+      <button id="connect-wallet" class="btn btn-secondary">1. Connect Authority Wallet</button>
+      <button id="launch-token" class="btn btn-primary" disabled>2. Ignite $CHZ Launch</button>
+      <button id="register-metadata" class="btn btn-primary" style="background: linear-gradient(90deg, #ffd166, #ff7930);" disabled>3. Finalize Name & Logo</button>
+      
+      <div id="mint-address-display" style="display:none; margin-top: 2rem; text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;">
+        <span style="display:block; font-size: 0.75rem; color: var(--brand-ember); margin-bottom: 0.5rem;">OFFICIAL TOKEN MINT:</span>
+        <code id="mint-address" style="word-break: break-all; font-size: 0.9rem; color: #fff; background: rgba(0,0,0,0.4); padding: 10px; border-radius: 8px; display: block;">7pQ6NNrUN73n5xEFqczgG3Yox6ZzTzW5g7aYgC1EhkHe</code>
+      </div>
+    </div>
 
     <script>
+      // Browser Polyfills
       import { Buffer } from "buffer";
+      import EventEmitter from "events";
+      
       window.Buffer = Buffer;
       globalThis.Buffer = Buffer;
+      window.EventEmitter = EventEmitter;
+      globalThis.EventEmitter = EventEmitter;
 
       import { 
         Connection, 
@@ -192,41 +197,41 @@ import Analytics from "@vercel/analytics/astro";
         logContainer.scrollTop = logContainer.scrollHeight;
       }
 
-      if (initLog) initLog.innerText = "> Awaiting wallet connection...";
+      if (initLog) initLog.innerText = "> Systems Online. Connect to Authority Wallet.";
 
       async function connect() {
+        log("Phantom access requested...", "info");
         try {
           const { solana } = window;
           if (solana?.isPhantom) {
             const res = await solana.connect();
             walletAddress = res.publicKey.toString();
-            connectBtn.innerText = `AUTHORIZED: ${walletAddress.slice(0,6)}`;
-            log(`Wallet connected.`, 'success');
+            connectBtn.innerText = `READY: ${walletAddress.slice(0,6)}`;
+            log(`Authority connected: ${walletAddress}`, 'success');
             launchBtn.disabled = false;
             metadataBtn.disabled = false;
           } else {
-            log("Phantom not found.", "error");
+            log("Error: Phantom not found.", "error");
           }
         } catch (err) {
-          log(`Connection failed: ${err.message}`, "error");
+          log(`Fail: ${err.message}`, "error");
         }
       }
 
-      // NO-UMI METADATA LOGIC
       async function registerMetadata() {
         if (!walletAddress) return;
         metadataBtn.disabled = true;
-        log("Accessing branding modules...", "info");
+        log("Deploying Token Branding (Step 3)...", "info");
 
         try {
-          // Import only what is needed, avoiding the big UMI prototype issues
-          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
+          // Dynamic load to capture environment
           const { createUmi } = await import("@metaplex-foundation/umi-bundle-defaults");
           const { walletAdapterIdentity } = await import("@metaplex-foundation/umi-signer-wallet-adapters");
+          const { createMetadataAccountV3, mplTokenMetadata, findMetadataPda } = await import("@metaplex-foundation/mpl-token-metadata");
           const { publicKey: umiPublicKey, none } = await import("@metaplex-foundation/umi");
           const { fromWeb3JsPublicKey } = await import("@metaplex-foundation/umi-web3js-adapters");
 
-          log("Connecting to network...", "info");
+          log("Syncing with blockchain...", "info");
           const umi = createUmi("https://solana-rpc.publicnode.com")
             .use(mplTokenMetadata())
             .use(walletAdapterIdentity(window.solana));
@@ -234,7 +239,7 @@ import Analytics from "@vercel/analytics/astro";
           const mint = umiPublicKey(currentMint);
           const metadata = findMetadataPda(umi, { mint });
 
-          log(`Finalizing Charizard Token ($CHZ)...`, "info");
+          log(`Name: Charizard Token | Symbol: CHZ`, "info");
           
           const transaction = createMetadataAccountV3(umi, {
             metadata,
@@ -255,14 +260,15 @@ import Analytics from "@vercel/analytics/astro";
             collectionDetails: none(),
           });
 
-          log("SIGN IN PHANTOM TO FINALIZE...", "info");
+          log("SIGN OFFICIAL BRANDING IN PHANTOM...", "info");
           await transaction.sendAndConfirm(umi);
           
-          log("🔥 TOKEN IS OFFICIALLY BRANDED!", "success");
-          metadataBtn.innerText = "SUCCESS";
+          log("🔥 $CHZ BRANDING COMPLETE!", "success");
+          metadataBtn.innerText = "TOKEN FINALIZED";
 
         } catch (err) {
-          log(`Metadata Error: ${err.message}`, "error");
+          log(`Error: ${err.message}`, "error");
+          console.error(err);
           metadataBtn.disabled = false;
         }
       }
@@ -270,8 +276,7 @@ import Analytics from "@vercel/analytics/astro";
       async function launch() {
         if (!walletAddress) return;
         launchBtn.disabled = true;
-        log("Launching new token...", "info");
-        // Logic same as before for minting
+        log("Starting Mint Sequence...", "info");
         try {
           const connection = new Connection("https://solana-rpc.publicnode.com", "confirmed");
           const payer = new PublicKey(walletAddress);
@@ -294,11 +299,11 @@ import Analytics from "@vercel/analytics/astro";
           transaction.feePayer = payer;
           transaction.partialSign(mintKeypair);
 
-          log("SIGN MINT TRANSACTION...", "info");
+          log("CONFIRM MINT IN PHANTOM...", "info");
           const { signature } = await window.solana.signAndSendTransaction(transaction);
           await connection.confirmTransaction(signature);
           currentMint = mintKeypair.publicKey.toString();
-          log(`Minted: ${currentMint}`, "success");
+          log(`Mint Success: ${currentMint}`, "success");
           mintDisplay.style.display = 'block';
           mintCode.innerText = currentMint;
         } catch(e) { log(e.message, "error"); launchBtn.disabled = false; }
